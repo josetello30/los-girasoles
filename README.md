@@ -1,5 +1,7 @@
 # Los Girasoles · Plataforma digital integral
 
+[![CI](https://github.com/josetello30/los-girasoles/actions/workflows/ci.yml/badge.svg)](https://github.com/josetello30/los-girasoles/actions/workflows/ci.yml)
+
 Plataforma de gestión administrativa, reservas y control de acceso para el
 **Club Residencial Los Girasoles de Huampaní** (≈1500 socios).
 
@@ -35,6 +37,7 @@ flowchart LR
 
 ```
 los-girasoles/
+├── .github/workflows/ci.yml  # integración continua: compila y prueba todo en cada push
 ├── docker-compose.yml     # orquestación de contenedores
 ├── .env.example           # plantilla de variables de entorno
 ├── Makefile               # atajos: make up, make test-db, make reset...
@@ -177,6 +180,20 @@ Detalles y metodología del modelo: [`dashboard/README.md`](dashboard/README.md)
   <img src="docs/capturas/panel/02_dashboard.png" width="420" alt="Dashboard">
   <img src="docs/capturas/panel/03_morosidad_riesgo.png" width="420" alt="Riesgo de morosidad">
 </p>
+
+### 7. Integración continua (DevOps)
+
+Cada `git push` a `main` dispara el pipeline de GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)),
+que en los servidores de GitHub y en paralelo:
+
+| Trabajo | Qué hace |
+|---|---|
+| Firmware ESP32 | Compila la garita con PlatformIO |
+| App móvil | Revisión de tipos (TypeScript) y de estilo (ESLint) |
+| Sistema completo | `make up` y luego `test-db`, `test-api`, `test-dashboard`, `test-e2e` y `carga`; guarda `docs/evidencias` como artefacto descargable |
+
+El resultado se ve en la pestaña **Actions** del repositorio y en el distintivo de arriba.
+Si Actions estuviera desactivado: *Settings → Actions → General → Allow all actions*.
 
 ## Credenciales de demostración
 

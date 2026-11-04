@@ -1,0 +1,118 @@
+# =============================================================================
+# Integración continua - Club Residencial Los Girasoles
+#
+# En cada push o pull request a main, GitHub ejecuta en sus servidores:
+#   1. firmware   -> compila el firmware del ESP32 con PlatformIO
+#   2. app-movil  -> revisa tipos (TypeScript) y estilo (ESLint) de la app Expo
+#   3. sistema    -> levanta todo con Docker (make up), igual que en Fedora, y
+#                    ejecuta las pruebas de BD, API, modelo de IA, punta a punta,
+#                    seguridad y carga. Las evidencias quedan como artefacto.
+# Los tres trabajos corren en paralelo. No modifica el código ni despliega nada.
+# =============================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # permite ejecutarlo a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+
+# Si llega un push nuevo mientras corre el anterior, se cancela el viejo
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  firmware:
+    name: Firmware ESP32 (PlatformIO)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Caché de PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('iot/garita-esp32/platformio.ini') }}
+      - name: Instalar PlatformIO
+        run: pip install platformio
+      - name: Compilar el firmware de la garita
+        run: pio run -d iot/garita-esp32
+
+  app-movil:
+    name: App móvil (TypeScript + ESLint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci --no-fund --no-audit
+      - name: Revisión de tipos
+        run: npm run typecheck
+      - name: Revisión de estilo
+        run: npm run lint
+
+  sistema:
+    name: Sistema completo en Docker + pruebas
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Crear .env desde .env.example
+        run: make env
+
+      - name: Levantar BD, API, panel y Adminer (make up)
+        run: make up
+
+      - name: Pruebas de integridad de la base de datos
+        run: |
+          make test-db | tee bd.log
+          grep -q "Todas las pruebas de integridad pasaron" bd.log
+
+      - name: Pruebas de la API (Jest + Supertest)
+        run: make test-api
+
+      - name: Pruebas del modelo de IA (pytest)
+        run: make test-dashboard
+
+      - name: Pruebas de punta a punta y de seguridad
+        run: make test-e2e
+
+      - name: Prueba de carga de la garita (RNF02)
+        run: make carga
+
+      - name: Estado de los contenedores
+        if: always()
+        run: docker compose ps --format 'table {{.Name}}\t{{.Image}}\t{{.Status}}' | tee docs/evidencias/contenedores.txt
+
+      - name: Logs de los servicios (solo si algo falló)
+        if: failure()
+        run: docker compose logs --no-color --tail=200
+
+      - name: Publicar evidencias
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-${{ github.run_number }}
+          path: docs/evidencias/
+          if-no-files-found: warn
+
+      - name: Apagar contenedores
+        if: always()
+        run: docker compose down -v

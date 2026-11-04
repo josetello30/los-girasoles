@@ -21,6 +21,10 @@ make evidencias   # ejecuta TODAS las pruebas y guarda los resultados en docs/ev
 | `make carga` | Carga de la garita con 1 a 50 lecturas simultáneas (RNF02) | 4 niveles × 200 | Node 22 |
 | **Total automatizado** | | **134 pruebas + prueba de carga** | |
 
+En GitHub, el pipeline de integración continua (`.github/workflows/ci.yml`) ejecuta todo esto en cada
+`push` a `main`, además de compilar el firmware y revisar la app móvil. Las evidencias de cada
+ejecución se descargan desde la pestaña **Actions**.
+
 ## Niveles de prueba
 
 ```mermaid

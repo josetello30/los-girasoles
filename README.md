@@ -1,0 +1,176 @@
+# Los Girasoles · Plataforma digital integral
+
+Plataforma de gestión administrativa, reservas y control de acceso para el
+**Club Residencial Los Girasoles de Huampaní** (≈1500 socios).
+
+Trabajo final del curso **Diseño e Implementación en Ambientes Emergentes**
+— Universidad San Ignacio de Loyola, Facultad de Ingeniería e Inteligencia Artificial.
+
+```mermaid
+flowchart LR
+    APP["📱 App socios<br/>React Native + Expo"] -->|REST + JWT| API
+    ESP["📟 Garita ESP32 + RC522<br/>Wokwi / PlatformIO"] -->|HTTP POST + API key| API
+    API["⚙️ Backend<br/>Node.js + Express"] -->|rol app_rw| DB[("🐘 PostgreSQL 16")]
+    DASH["📊 Dashboard<br/>Streamlit + Pandas + scikit-learn"] -->|rol dashboard_ro<br/>solo lectura| DB
+    subgraph Docker en Fedora Linux
+        API
+        DB
+        DASH
+    end
+```
+
+## Avance por sprint
+
+| Sprint | Entregable | Estado |
+|---|---|---|
+| 0 | Análisis, MER y arquitectura | ✅ |
+| 1 | Base de datos, semilla de datos, Docker | ✅ |
+| 2 | Backend: autenticación, socios, reservas, pagos, validación de acceso | ⏳ |
+| 3 | IoT: garita ESP32 + RFID simulada en Wokwi | ⏳ |
+| 4 | App móvil Expo | ⏳ |
+| 5 | Dashboard Streamlit + modelo de riesgo de morosidad | ⏳ |
+| 6 | Pruebas, evidencias e informe final | ⏳ |
+
+## Estructura del repositorio
+
+```
+los-girasoles/
+├── docker-compose.yml     # orquestación de contenedores
+├── .env.example           # plantilla de variables de entorno
+├── Makefile               # atajos: make up, make test-db, make reset...
+├── database/
+│   ├── init/              # se ejecutan solos al crear la BD
+│   │   ├── 01_extensiones.sql
+│   │   ├── 02_esquema.sql     # 23 tablas, tipos y restricciones
+│   │   ├── 03_funciones.sql   # triggers, emisión de cuotas, nómina
+│   │   ├── 04_vistas.sql      # vistas para el dashboard y estados de cuenta
+│   │   ├── 05_semilla.sql     # datos ficticios de demostración
+│   │   └── 06_roles.sh        # roles con mínimo privilegio
+│   └── tests/
+│       └── pruebas_integridad.sql
+├── backend/               # Sprint 2
+├── iot/                   # Sprint 3
+├── mobile/                # Sprint 4
+├── dashboard/             # Sprint 5
+└── docs/
+    └── MER.md             # modelo entidad-relación y reglas de negocio
+```
+
+## Puesta en marcha en Fedora Linux
+
+### 1. Requisitos (una sola vez)
+
+**Git y Make**
+```bash
+sudo dnf install -y git make
+```
+
+**Docker CE** (recomendado). Para Fedora 41 o superior:
+```bash
+sudo dnf -y install dnf-plugins-core
+sudo dnf config-manager addrepo --from-repofile=https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER      # luego cierra sesión y vuelve a entrar
+docker run --rm hello-world         # comprobación
+```
+
+<details>
+<summary>Alternativa: Podman (ya viene instalado en Fedora)</summary>
+
+```bash
+sudo dnf install -y podman-compose
+# En cada comando de make agrega:  COMPOSE="podman compose"
+make up COMPOSE="podman compose"
+```
+</details>
+
+### 2. Clonar y levantar
+
+```bash
+git clone https://github.com/josetello30/los-girasoles.git
+cd los-girasoles
+make up
+```
+
+`make up` crea el archivo `.env` desde `.env.example`, descarga las imágenes y crea la base de datos con
+todos los datos de demostración (la primera vez tarda ~1 minuto).
+
+Sin Make, el equivalente es:
+```bash
+cp .env.example .env
+docker compose up -d
+```
+
+### 3. Comprobar que todo funciona
+
+```bash
+make estado      # KPIs: debe mostrar ~1500 socios, recaudación del mes, morosidad...
+make test-db     # 19 pruebas de integridad: todas deben decir [OK]
+```
+
+Abre **Adminer** en http://localhost:8080 para explorar la base de datos:
+
+| Campo | Valor |
+|---|---|
+| Sistema | PostgreSQL |
+| Servidor | `postgres` |
+| Usuario | `girasoles` |
+| Contraseña | `girasoles_dev_2026` |
+| Base de datos | `girasoles` |
+
+### 4. Actualizar en cada sprint
+
+```bash
+git pull
+make reset       # solo si el sprint cambió archivos de database/init (borra y recrea la BD)
+make up
+```
+
+> Los scripts de `database/init` solo se ejecutan cuando el volumen está **vacío**.
+> Si cambian, hay que ejecutar `make reset` para verlos aplicados.
+
+## Credenciales de demostración
+
+Todos los datos son **ficticios**. Estas credenciales son solo para el entorno de desarrollo.
+
+| Perfil | Usuario | Contraseña | Uso |
+|---|---|---|---|
+| Socio de demo | `00247` (José Miguel Quispe Soto) | `Girasoles2026` | App móvil |
+| Socio moroso | `00289` (Roberto Silva Castro) | `Girasoles2026` | Probar bloqueo de reservas |
+| Cualquier socio | su número (`00001` … `00820`) | `Girasoles2026` | App móvil |
+| Administrador | `admin` | `Admin2026!` | Panel administrativo |
+| Guardia | `guardia01` | `Guardia2026!` | Validación de QR en garita |
+
+| Tarjeta RFID (simulador) | Resultado esperado |
+|---|---|
+| `A1B2C3D4` | Socio 00247, acceso permitido |
+| `DEADBEEF` | Tarjeta perdida del socio 00247, acceso denegado |
+| `C0FFEE01` | Trabajador de limpieza, acceso permitido (asistencia) |
+
+## Datos de demostración
+
+La semilla genera datos **relativos a la fecha actual**, así el dashboard siempre muestra información "de hoy":
+
+- 1500 socios (820 titulares con lote + 680 dependientes) y 25 trabajadores.
+- 12 meses de cuotas de mantenimiento (S/ 180) y pagos con tres perfiles: puntual, irregular y moroso.
+- ~13 000 reservas (últimos 90 días y próximas 2 semanas) en 14 instalaciones.
+- ~13 000 registros de acceso (30 días de socios e invitados, 90 días de personal).
+- Tienda con 8 productos y 70 pedidos; nómina simulada de 3 meses.
+
+## Solución de problemas
+
+| Síntoma | Causa probable | Solución |
+|---|---|---|
+| `permission denied` al leer `/docker-entrypoint-initdb.d` | SELinux bloquea el volumen | Verifica que el `docker-compose.yml` tenga `:Z` en los volúmenes |
+| `port is already allocated` en 5432 | Ya tienes otro PostgreSQL | Cambia `POSTGRES_PORT=5433` en `.env` |
+| Cambié un `.sql` y no se refleja | Los scripts solo corren con el volumen vacío | `make reset` |
+| `permission denied ... docker.sock` | Tu usuario no está en el grupo docker | `sudo usermod -aG docker $USER` y vuelve a iniciar sesión |
+| Expo Go (celular) no llega a la API | firewalld bloquea el puerto | `sudo firewall-cmd --add-port=3000/tcp --permanent && sudo firewall-cmd --reload` (Sprint 4) |
+
+## Equipo
+
+- Portocarrero Huallullo, Pier Antoni
+- Tello Saaz, José Miguel
+
+Profesor: Navarro Vela, Herbert Francisco.

@@ -1,0 +1,67 @@
+# =============================================================================
+# Club Residencial Los Girasoles de Huampaní - Infraestructura de contenedores
+# Uso:   cp .env.example .env   &&   docker compose up -d
+# Sprint 1: base de datos + Adminer.
+# Sprint 2 agregará el backend (Node.js) y el Sprint 5 el dashboard (Streamlit).
+# =============================================================================
+name: los-girasoles
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 16: única fuente de verdad del sistema
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: girasoles-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Define POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en .env}
+      # Roles de aplicación (los crea database/init/06_roles.sh)
+      APP_DB_USER: ${APP_DB_USER}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      DASHBOARD_DB_USER: ${DASHBOARD_DB_USER}
+      DASHBOARD_DB_PASSWORD: ${DASHBOARD_DB_PASSWORD}
+      TZ: America/Lima
+      PGTZ: America/Lima
+    command:
+      - postgres
+      - -c
+      - timezone=America/Lima
+      - -c
+      - log_min_duration_statement=500   # registra consultas lentas (> 500 ms)
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Los scripts se ejecutan solo la PRIMERA vez (volumen vacío).
+      # ':Z' re-etiqueta la carpeta para SELinux (obligatorio en Fedora).
+      - ./database/init:/docker-entrypoint-initdb.d:ro,Z
+      - ./database/tests:/pruebas:ro,Z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Adminer: explorador web de la BD para el equipo (http://localhost:8080)
+  # ---------------------------------------------------------------------------
+  adminer:
+    image: adminer:4
+    container_name: girasoles-adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+    name: girasoles-pgdata

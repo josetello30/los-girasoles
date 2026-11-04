@@ -1,0 +1,8 @@
+# Fuerza saltos de línea LF en scripts: si un compañero clona en Windows,
+# un .sh con CRLF rompería el arranque del contenedor de PostgreSQL.
+* text=auto eol=lf
+*.sh  text eol=lf
+*.sql text eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary

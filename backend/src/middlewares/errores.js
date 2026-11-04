@@ -20,6 +20,11 @@ function manejadorErrores(err, req, res, _next) {
     error = errores.solicitudInvalida('El cuerpo de la solicitud no es un JSON válido');
   }
 
+  // Cuerpo mayor al límite de express.json (100 KB): es un error del cliente, no del servidor
+  if (!error && err.type === 'entity.too.large') {
+    error = new ErrorApi(413, 'SOLICITUD_DEMASIADO_GRANDE', 'La solicitud supera el tamaño máximo permitido (100 KB)');
+  }
+
   if (!error) {
     // Error no previsto: se registra completo, pero al cliente no se le filtran detalles internos.
     console.error(`[error] ${req.method} ${req.originalUrl}`, err);

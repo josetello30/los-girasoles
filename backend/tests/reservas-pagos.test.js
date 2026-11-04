@@ -106,7 +106,9 @@ describe('Reglas de negocio', () => {
     const res = await api(token).post('/reservas', franja);
     expect(res.status).toBe(403);
     expect(res.body.error.codigo).toBe('MOROSIDAD');
-    expect(res.body.error.mensaje).toMatch(/S\/ 540\.00/);
+    // El monto depende del día del mes (cada fin de mes vence una cuota más): se compara con su estado de cuenta
+    const { body: cuenta } = await api(token).get('/pagos/estado-cuenta');
+    expect(res.body.error.mensaje).toContain(`S/ ${cuenta.resumen.deuda_vencida.toFixed(2)}`);
   });
 
   test('N02 no se reserva con más de 14 días de anticipación', async () => {
@@ -154,7 +156,11 @@ describe('Estado de cuenta y pagos', () => {
     const token = await login('00289');
     const res = await api(token).get('/pagos/estado-cuenta');
     expect(res.status).toBe(200);
-    expect(res.body.resumen).toMatchObject({ estado_pago: 'VENCIDO', deuda_vencida: 540 });
+    expect(res.body.resumen.estado_pago).toBe('VENCIDO');
+    // La semilla le deja al menos 3 cuotas vencidas (S/ 540); el total crece con el calendario
+    const vencidas = res.body.por_pagar.filter((c) => c.estado === 'VENCIDA');
+    expect(res.body.resumen.deuda_vencida).toBe(vencidas.reduce((t, c) => t + c.saldo, 0));
+    expect(res.body.resumen.deuda_vencida).toBeGreaterThanOrEqual(540);
     expect(res.body.por_pagar.length).toBeGreaterThanOrEqual(3);
     expect(res.body.cuota_mensual).toBe(180);
   });

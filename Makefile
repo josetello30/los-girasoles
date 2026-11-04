@@ -6,11 +6,17 @@
 -include .env
 export
 
+SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+
 COMPOSE ?= docker compose
+EVIDENCIAS := docs/evidencias
+# Los contenedores de prueba escriben en docs/evidencias con tu usuario (no como root)
+COMO_YO := --user $$(id -u):$$(id -g)
 API_PUERTO := $(or $(BACKEND_PORT),3000)
 API_URL := http://localhost:$(API_PUERTO)/api/v1
 
-.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test-dashboard test estado tarjeta app logs-panel
+.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test-dashboard test-e2e carga evidencias test estado tarjeta app logs-panel
 
 ayuda:            ## Muestra esta ayuda
 	@grep -hE '^[a-z-]+:.*## ' Makefile | awk 'BEGIN{FS=":.*## "}{printf "  \033[32m%-14s\033[0m %s\n", $$1, $$2}'
@@ -69,7 +75,27 @@ test-api:         ## Ejecuta las pruebas automáticas de la API (Jest + Supertes
 test-dashboard:   ## Ejecuta las pruebas del modelo de riesgo de morosidad (pytest)
 	$(COMPOSE) --profile pruebas run --rm --build dashboard-pruebas
 
-test: test-db test-api test-dashboard  ## Ejecuta todas las pruebas
+test-e2e:         ## Pruebas de punta a punta y de seguridad contra el sistema levantado
+	@mkdir -p $(EVIDENCIAS)
+	$(COMPOSE) --profile pruebas run --rm $(COMO_YO) pruebas-e2e node --test --test-concurrency=1 \
+		--test-reporter=spec --test-reporter-destination=stdout \
+		--test-reporter=spec --test-reporter-destination=/evidencias/e2e.txt 'e2e/*.test.mjs'
+
+carga:            ## Prueba de carga de la garita (RNF02): 1 a 50 garitas simultáneas
+	@mkdir -p $(EVIDENCIAS)
+	$(COMPOSE) --profile pruebas run --rm $(COMO_YO) pruebas-e2e node carga/garita.mjs
+
+test: test-db test-api test-dashboard test-e2e  ## Ejecuta todas las pruebas
+
+evidencias:       ## Ejecuta TODAS las pruebas y guarda los resultados en docs/evidencias (para el informe)
+	@mkdir -p $(EVIDENCIAS)
+	$(COMPOSE) ps --format 'table {{.Name}}\t{{.Image}}\t{{.Status}}' | tee $(EVIDENCIAS)/contenedores.txt
+	$(MAKE) --no-print-directory test-db | tee $(EVIDENCIAS)/bd.txt
+	$(MAKE) --no-print-directory test-api 2>&1 | tee $(EVIDENCIAS)/api.txt
+	$(MAKE) --no-print-directory test-dashboard 2>&1 | tee $(EVIDENCIAS)/modelo.txt
+	$(MAKE) --no-print-directory test-e2e
+	$(MAKE) --no-print-directory carga
+	@echo "Evidencias guardadas en $(EVIDENCIAS)/" 
 
 estado:           ## Muestra los KPIs principales (comprobación rápida)
 	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) -x -c "SELECT * FROM v_kpi_resumen"

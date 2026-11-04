@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const { api, login, db, socioLibre, hoyLima, sumarDias } = require('./ayuda');
+const { api, login, db, socioLibre, titularConCupoInvitados, hoyLima, sumarDias } = require('./ayuda');
 
 afterAll(() => db.cerrar());
 
@@ -28,7 +28,7 @@ describe('Invitados', () => {
   let socio;
   let guardia;
   beforeAll(async () => {
-    socio = await login((await socioLibre(6)).numero_socio);
+    socio = await login((await titularConCupoInvitados()).numero_socio);
     guardia = await login('guardia01', 'Guardia2026!');
   });
 

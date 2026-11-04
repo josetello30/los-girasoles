@@ -43,6 +43,11 @@ const config = {
   // Ejecutar tareas programadas (emisión de cuotas, cierre de reservas). Se apaga en pruebas.
   tareasActivas: process.env.TAREAS_ACTIVAS !== 'false',
 
+  // Saltos de proxy inverso en los que se confía para leer la IP real (X-Forwarded-For).
+  // 0 = ninguno: la API se expone directo (Docker Compose). Si se pone detrás de Nginx, usar 1.
+  // Confiar sin tener proxy permitiría saltarse el límite de intentos falsificando la cabecera.
+  proxiesConfiables: Number(process.env.TRUST_PROXY || 0),
+
   zonaHoraria: 'America/Lima',
 };
 

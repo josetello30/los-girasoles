@@ -1,0 +1,81 @@
+▶ E2E-01 · Ingreso con QR dinámico (RF01 + RF05 + RNF02)
+  ✔ el socio genera su QR en la app (vigencia de 5 minutos) (225.317528ms)
+  ✔ la garita lee el QR y permite el ingreso en menos de 2 s (17.680544ms)
+  ✔ el mismo QR no sirve dos veces (un solo uso) (9.579773ms)
+  ✔ el ingreso aparece en el registro en vivo del guardia y del panel (20.662592ms)
+✔ E2E-01 · Ingreso con QR dinámico (RF01 + RF05 + RNF02) (418.567685ms)
+▶ E2E-02 · Tarjetas RFID del simulador Wokwi (contrato del ESP32)
+  ✔ A1B2C3D4: permitido · socio 00247 activo (52.578357ms)
+  ✔ 11223344: permitido · socio 00289 moroso: la deuda NO impide entrar (89.736339ms)
+  ✔ 55667788: permitido · personal de limpieza (marca asistencia) (28.237926ms)
+  ✔ AABBCCDD: denegado · tarjeta reportada como perdida (79.824879ms)
+  ✔ C0FFEE99: denegado · tarjeta no registrada (15.766291ms)
+  ✔ 04112233445566: denegado · socio suspendido (tag NFC de 7 bytes) (15.658427ms)
+✔ E2E-02 · Tarjetas RFID del simulador Wokwi (contrato del ESP32) (282.810494ms)
+▶ E2E-03 · Socio moroso: no reserva, pero sí ingresa
+  ✔ su estado de cuenta figura como VENCIDO (48.228508ms)
+  ✔ la app le impide reservar e indica el monto adeudado (131.057311ms)
+  ✔ su tarjeta sigue abriendo la garita (decisión de negocio) (6.78755ms)
+✔ E2E-03 · Socio moroso: no reserva, pero sí ingresa (317.626576ms)
+▶ E2E-04 · Reserva con pago en línea, visible en la agenda del panel (RF02)
+  ✔ el socio consulta la disponibilidad y elige una franja libre (65.454366ms)
+  ✔ la reserva con tarifa queda PENDIENTE de pago (43.395549ms)
+  ✔ otro socio ya no puede tomar esa franja (66.072985ms)
+  ✔ la pasarela rechaza una tarjeta sin fondos (402) sin confirmar la reserva (8.614724ms)
+  ✔ con una tarjeta válida la reserva pasa a CONFIRMADA y el comprobante oculta el número (34.927502ms)
+  ✔ la reserva aparece en la agenda del día que ve la administración (11.02286ms)
+  ✔ al cancelarla, la franja vuelve a quedar libre (limpieza de la prueba) (13.545419ms)
+✔ E2E-04 · Reserva con pago en línea, visible en la agenda del panel (RF02) (578.032076ms)
+▶ E2E-05 · Pago en ventanilla desde el panel actualiza la app del socio
+  ✔ la administración registra en ventanilla la cuota vencida (46.593361ms)
+  ✔ el socio ve al instante su deuda reducida en la app (35.976297ms)
+✔ E2E-05 · Pago en ventanilla desde el panel actualiza la app del socio (257.310188ms)
+▶ E2E-06 · Mantenimiento programado desde el panel bloquea la reserva en la app
+  ✔ la administración bloquea por mantenimiento una franja libre del frontón (68.676659ms)
+  ✔ el socio ve la franja como no disponible y no puede reservarla (45.160966ms)
+✔ E2E-06 · Mantenimiento programado desde el panel bloquea la reserva en la app (346.725174ms)
+▶ E2E-07 · Noticia publicada desde el panel llega a la app (RF03)
+  ✔ la administración publica una noticia IMPORTANTE (15.990311ms)
+  ✔ el socio la ve en la app entre las importantes, arriba (184.712378ms)
+  ✔ al retirarla deja de mostrarse (limpieza de la prueba) (9.752271ms)
+✔ E2E-07 · Noticia publicada desde el panel llega a la app (RF03) (210.930954ms)
+▶ E2E-08 · Invitado registrado en la app ingresa con su QR
+  ✔ el socio registra al invitado del día y la garita lo deja pasar (211.195123ms)
+✔ E2E-08 · Invitado registrado en la app ingresa con su QR (211.47632ms)
+▶ E2E-09 · Servicios en ejecución (RNF01)
+  ✔ la API y su conexión a la base de datos están saludables (3.407212ms)
+  ✔ el panel administrativo responde (4.779551ms)
+✔ E2E-09 · Servicios en ejecución (RNF01) (8.408184ms)
+▶ SEG-01 · Autenticación
+  ✔ sin token no hay acceso a datos (401) (30.903913ms)
+  ✔ un token alterado se rechaza (firma JWT) (6.751003ms)
+  ✔ contraseña incorrecta: mensaje genérico que no revela si el usuario existe (171.948255ms)
+  ✔ la garita sin API key o con una clave falsa recibe 401 (9.502388ms)
+✔ SEG-01 · Autenticación (445.121253ms)
+▶ SEG-02 · Autorización por rol y por objeto
+  ✔ un socio no accede a rutas de administración (403) (11.384504ms)
+  ✔ un socio no puede pagar ni cancelar recursos de otro socio (161.174349ms)
+  ✔ el guardia ve el registro de accesos pero no la nómina (104.125444ms)
+✔ SEG-02 · Autorización por rol y por objeto (277.239041ms)
+▶ SEG-03 · Inyección y validación de entradas
+  ✔ una inyección SQL en la búsqueda se trata como texto (9.133266ms)
+  ✔ una inyección en el UID de la garita no rompe nada y se deniega (6.530346ms)
+  ✔ datos con formato inválido devuelven 400 con detalle por campo (9.783557ms)
+  ✔ un cuerpo de más de 100 KB se rechaza (6.478067ms)
+✔ SEG-03 · Inyección y validación de entradas (32.586309ms)
+▶ SEG-04 · Exposición de datos y cabeceras
+  ✔ el perfil no expone el hash de la contraseña (34.719383ms)
+  ✔ las respuestas llevan cabeceras de seguridad y no revelan la tecnología (3.608174ms)
+  ✔ un error interno no filtra trazas ni SQL (5.29861ms)
+✔ SEG-04 · Exposición de datos y cabeceras (44.03175ms)
+▶ SEG-05 · Fuerza bruta en el login
+  ✔ tras 10 intentos fallidos la IP queda bloqueada (429), aunque falsifique X-Forwarded-For (698.467945ms)
+✔ SEG-05 · Fuerza bruta en el login (698.735548ms)
+ℹ tests 45
+ℹ suites 14
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4368.873645

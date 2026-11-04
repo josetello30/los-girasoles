@@ -1,0 +1,12 @@
+{
+  "name": "girasoles-pruebas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pruebas de punta a punta, seguridad y carga contra el sistema levantado (sin dependencias)",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "e2e": "node --test --test-concurrency=1 --test-reporter=spec "e2e/*.test.mjs"",
+    "carga": "node carga/garita.mjs"
+  }
+}

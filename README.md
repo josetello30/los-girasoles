@@ -29,7 +29,7 @@ flowchart LR
 | 3 | IoT: garita ESP32 + RFID simulada en Wokwi | ✅ |
 | 4 | App móvil Expo | ✅ |
 | 5 | Panel administrativo Streamlit + modelo de riesgo de morosidad (IA) | ✅ |
-| 6 | Pruebas, evidencias e informe final | ⏳ |
+| 6 | Pruebas de punta a punta, seguridad, carga e informe final | ✅ |
 
 ## Estructura del repositorio
 
@@ -58,7 +58,10 @@ los-girasoles/
 │   ├── paginas/           # dashboard, morosidad e IA, accesos en vivo, reservas, pagos...
 │   ├── modelo/riesgo.py   # modelo de riesgo de morosidad (scikit-learn)
 │   └── tests/             # 12 pruebas del modelo (pytest)
+├── pruebas/               # pruebas de punta a punta, seguridad y carga (Sprint 6)
 └── docs/
+    ├── PRUEBAS.md         # plan de pruebas y matriz de trazabilidad
+    ├── evidencias/        # resultados de make evidencias
     ├── MER.md             # modelo entidad-relación y reglas de negocio
     ├── API.md             # referencia de todos los endpoints
     └── sprints/           # historias, decisiones y evidencias por sprint
@@ -117,6 +120,9 @@ make estado      # KPIs: debe mostrar ~1500 socios, recaudación del mes, morosi
 make test-db     # 19 pruebas de integridad: todas deben decir [OK]
 make test-api    # 58 pruebas de la API: todas deben pasar
 make test-dashboard  # 12 pruebas del modelo de riesgo: todas deben pasar
+make test-e2e    # 45 pruebas de punta a punta y de seguridad
+make carga       # prueba de carga de la garita (RNF02)
+make evidencias  # todo lo anterior, guardado en docs/evidencias/ para el informe
 curl localhost:3000/api/v1/health
 ```
 

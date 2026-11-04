@@ -59,6 +59,25 @@ async function socioLibre(saltar = 0) {
   return rows[0];
 }
 
+/**
+ * Titular al día con cupo de invitados (límite de 8 por familia al mes).
+ * Sin esto, ejecutar las pruebas varias veces en el mismo mes agotaría el cupo
+ * de una misma familia y la prueba fallaría sin que haya un error real.
+ */
+async function titularConCupoInvitados() {
+  const { rows } = await db.query(
+    `SELECT sd.numero_socio
+     FROM v_socio_detalle sd
+     WHERE sd.tipo = 'TITULAR' AND sd.estado_socio = 'ACTIVO' AND sd.estado_pago = 'AL_DIA'
+       AND (SELECT count(*) FROM invitado i JOIN socio s ON s.id = i.socio_anfitrion_id
+            WHERE COALESCE(s.titular_id, s.id) = sd.socio_id
+              AND i.fecha_visita >= date_trunc('month', CURRENT_DATE)) <= 4
+     ORDER BY sd.numero_socio DESC
+     LIMIT 1`,
+  );
+  return rows[0];
+}
+
 async function instalacion(codigo) {
   const { rows } = await db.query('SELECT id, tarifa_hora FROM instalacion WHERE codigo = $1', [codigo]);
   return rows[0];
@@ -77,6 +96,6 @@ async function franjaLibre(token, codigo, desdeDias = 3) {
 }
 
 module.exports = {
-  app, db, API, login, api, garita, socioLibre, instalacion, franjaLibre,
+  app, db, API, login, api, garita, socioLibre, titularConCupoInvitados, instalacion, franjaLibre,
   hoyLima, sumarDias, CLAVE_GARITA, PASSWORD_SOCIOS,
 };

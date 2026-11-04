@@ -82,6 +82,7 @@ services:
       JWT_EXPIRA: ${JWT_EXPIRA:-8h}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
       RESERVA_PENDIENTE_MINUTOS: ${RESERVA_PENDIENTE_MINUTOS:-30}
+      TRUST_PROXY: ${TRUST_PROXY:-0}
       TZ: America/Lima
     ports:
       - "${BACKEND_PORT:-3000}:3000"
@@ -142,6 +143,27 @@ services:
     image: girasoles-dashboard-pruebas
     profiles: ["pruebas"]
     environment: *entorno-dashboard
+
+  # ---------------------------------------------------------------------------
+  # Pruebas de punta a punta, seguridad y carga contra el sistema levantado
+  # (solo con: make test-e2e / make carga / make evidencias)
+  # ---------------------------------------------------------------------------
+  pruebas-e2e:
+    image: node:22-alpine
+    profiles: ["pruebas"]
+    working_dir: /pruebas
+    environment:
+      API_URL: http://backend:3000/api/v1
+      PANEL_URL: http://dashboard:8501
+      SALIDA: /evidencias
+    volumes:
+      - ./pruebas:/pruebas:ro,Z
+      - ./docs/evidencias:/evidencias:Z
+    depends_on:
+      backend:
+        condition: service_healthy
+      dashboard:
+        condition: service_healthy
 
 volumes:
   pgdata:

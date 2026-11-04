@@ -28,7 +28,7 @@ function crearApp() {
   const app = express();
 
   app.disable('x-powered-by');
-  app.set('trust proxy', 1); // detrás de un proxy inverso, para el límite de intentos por IP
+  app.set('trust proxy', config.proxiesConfiables); // ver TRUST_PROXY en config/env.js
   app.use(helmet());
   app.use(cors({
     origin: config.corsOrigenes.includes('*') ? true : config.corsOrigenes,

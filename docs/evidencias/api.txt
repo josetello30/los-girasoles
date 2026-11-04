@@ -1,0 +1,81 @@
+PASS tests/reservas-pagos.test.js
+  Disponibilidad
+    ✓ D01 lista instalaciones con franjas libres del día (97 ms)
+    ✓ D02 la piscina muestra mantenimiento en los días bloqueados (20 ms)
+    ✓ D03 fecha con formato inválido devuelve 400 (5 ms)
+  Ciclo completo: reservar -> pagar -> confirmar -> cancelar
+    ✓ C01 una cancha con tarifa queda PENDIENTE y genera su cuota (62 ms)
+    ✓ C02 otro socio no puede reservar la misma franja (43 ms)
+    ✓ C03 la pasarela rechaza una tarjeta sin fondos (9 ms)
+    ✓ C04 un socio no puede pagar la cuota de otro (5 ms)
+    ✓ C05 el pago aprobado confirma la reserva (28 ms)
+    ✓ C06 no se puede pagar dos veces la misma cuota (5 ms)
+    ✓ C07 al cancelar una reserva pagada se informa el reembolso y la franja se libera (50 ms)
+  Reglas de negocio
+    ✓ N01 un socio moroso no puede reservar (217 ms)
+    ✓ N02 no se reserva con más de 14 días de anticipación (183 ms)
+    ✓ N03 una hora que no coincide con los bloques se rechaza (205 ms)
+    ✓ N04 la posta (gratuita) se confirma de inmediato y sin cuota (244 ms)
+    ✓ N05 máximo 3 reservas vigentes por socio (416 ms)
+  Estado de cuenta y pagos
+    ✓ E01 el estado de cuenta trae resumen, cuotas por pagar e historial (195 ms)
+    ✓ E02 Yape con código inválido es rechazado (220 ms)
+    ✓ E03 datos de tarjeta incompletos devuelven 400 (138 ms)
+
+PASS tests/auth.test.js
+  Autenticación
+    ✓ A01 socio inicia sesión con su número de socio (187 ms)
+    ✓ A02 contraseña incorrecta devuelve 401 sin revelar si el usuario existe (188 ms)
+    ✓ A03 cuerpo incompleto devuelve 400 con el detalle del campo (4 ms)
+    ✓ A04 rutas protegidas exigen token válido (5 ms)
+    ✓ A05 /auth/yo devuelve el perfil con el estado de pago (164 ms)
+  Autorización por rol
+    ✓ R01 un socio no puede listar el padrón de socios (2 ms)
+    ✓ R02 un socio no puede ver la nómina (2 ms)
+    ✓ R03 el administrador filtra socios morosos (46 ms)
+    ✓ R04 el administrador busca por nombre (35 ms)
+    ✓ R05 el guardia ve el registro de accesos pero no la nómina (13 ms)
+    ✓ R06 el administrador consulta la nómina simulada (6 ms)
+
+PASS tests/servicios.test.js
+  Salud
+    ✓ H01 /health responde sin autenticación (18 ms)
+    ✓ H02 ruta inexistente: 401 sin sesión (no revela rutas) y 404 con sesión (192 ms)
+  Invitados
+    ✓ I01 el invitado de hoy ingresa con su QR (30 ms)
+    ✓ I02 un invitado de mañana no puede ingresar hoy (17 ms)
+    ✓ I03 DNI inválido devuelve 400 (4 ms)
+  Comunicación
+    ✓ M01 el socio ve noticias vigentes con las importantes primero (4 ms)
+    ✓ M02 el administrador publica una noticia (10 ms)
+    ✓ M03 un socio no puede publicar noticias (3 ms)
+    ✓ M04 inscripción a las olimpiadas y rechazo de doble inscripción (198 ms)
+    ✓ M05 servicios del club (4 ms)
+  Tienda (simulada)
+    ✓ T01 compra: descuenta stock, genera cuota y se paga con Yape (218 ms)
+    ✓ T02 no se vende más que el stock disponible (141 ms)
+
+PASS tests/accesos.test.js
+  Garita: autenticación del dispositivo
+    ✓ G01 sin API key devuelve 401 (6 ms)
+    ✓ G02 con API key incorrecta devuelve 401 (7 ms)
+    ✓ G03 UID con formato inválido devuelve 400 (4 ms)
+  Garita: tarjetas RFID
+    ✓ G04 tarjeta activa de socio: permitido con saludo para el LCD (11 ms)
+    ✓ G05 tarjeta reportada como perdida: denegado (11 ms)
+    ✓ G06 tarjeta desconocida: denegado y registrado sin persona (6 ms)
+    ✓ G07 tarjeta de personal de limpieza: permitido como trabajador (5 ms)
+    ✓ G08 la morosidad NO impide el ingreso (club residencial) (5 ms)
+    ✓ G10 tarjeta NFC de 7 bytes de un socio suspendido: denegado (4 ms)
+    ✓ G11 llavero C0FFEE99 no registrado: denegado (6 ms)
+    ✓ G09 cada intento queda en el log con su latencia (6 ms)
+  QR dinámico (RF01)
+    ✓ Q01 el socio genera un QR que vence en 5 minutos (9 ms)
+    ✓ Q02 el QR permite un ingreso y no puede reutilizarse (36 ms)
+    ✓ Q03 un QR expirado es rechazado (9 ms)
+    ✓ Q04 un QR inventado es rechazado (5 ms)
+    ✓ Q05 el guardia valida el QR desde su celular (97 ms)
+  RNF02: tiempo de respuesta de la validación (< 2 s)
+    ✓ P01 100 validaciones consecutivas con p95 bajo 2000 ms (464 ms)
+
+Tests: 58 passed, 58 total

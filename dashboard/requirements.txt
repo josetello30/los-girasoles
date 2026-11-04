@@ -1,0 +1,10 @@
+# Dashboard administrativo - Club Residencial Los Girasoles
+streamlit==1.66.1
+pandas==3.1.0
+plotly==7.1.0
+scikit-learn==1.9.1
+sqlalchemy==2.1.8
+psycopg[binary]==3.3.7
+requests==2.34.2
+# Zonas horarias (la imagen slim de Python no las trae)
+tzdata==2026.6

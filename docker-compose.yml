@@ -1,8 +1,7 @@
 # =============================================================================
 # Club Residencial Los Girasoles de Huampaní - Infraestructura de contenedores
 # Uso:   cp .env.example .env   &&   docker compose up -d
-# Sprint 1: base de datos + Adminer.
-# Sprint 2 agregará el backend (Node.js) y el Sprint 5 el dashboard (Streamlit).
+# Servicios: PostgreSQL, Adminer, backend (Node.js) y panel administrativo (Streamlit).
 # =============================================================================
 name: los-girasoles
 
@@ -109,6 +108,40 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Panel administrativo: Streamlit + Pandas + scikit-learn (http://localhost:8501)
+  # Lee la BD con el rol de SOLO LECTURA y escribe únicamente a través de la API.
+  # ---------------------------------------------------------------------------
+  dashboard:
+    build:
+      context: ./dashboard
+      target: produccion
+    image: girasoles-dashboard
+    container_name: girasoles-dashboard
+    restart: unless-stopped
+    environment: &entorno-dashboard
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${DASHBOARD_DB_USER}
+      DB_PASSWORD: ${DASHBOARD_DB_PASSWORD}
+      API_URL: http://backend:3000/api/v1
+      TZ: America/Lima
+    ports:
+      - "${DASHBOARD_PORT:-8501}:8501"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # Pruebas del modelo de riesgo (solo con: make test-dashboard)
+  dashboard-pruebas:
+    build:
+      context: ./dashboard
+      target: pruebas
+    image: girasoles-dashboard-pruebas
+    profiles: ["pruebas"]
+    environment: *entorno-dashboard
 
 volumes:
   pgdata:

@@ -1,0 +1,26 @@
+# Tema del panel administrativo (colores del prototipo de Figma)
+[theme]
+base = "light"
+primaryColor = "#14591A"
+backgroundColor = "#F6F5F0"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2421"
+borderColor = "#E4E1D6"
+baseRadius = "medium"
+showWidgetBorder = true
+
+[theme.sidebar]
+backgroundColor = "#14591A"
+textColor = "#FFFFFF"
+primaryColor = "#FFD000"
+borderColor = "#2E6F33"
+
+[server]
+headless = true
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"

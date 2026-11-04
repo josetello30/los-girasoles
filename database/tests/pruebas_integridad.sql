@@ -90,8 +90,10 @@ $q$, 'GR010');
 
 SELECT pg_temp.debe_fallar('P02', 'Pago mayor que el saldo de la cuota', $q$
     INSERT INTO pago (cuota_id, monto, metodo)
+    -- Cualquier cuota con saldo (siempre hay morosos). No se usa al socio 00247: es "puntual"
+    -- y, según el día del mes en que se crea la BD, puede no tener ninguna cuota pendiente.
     SELECT cuota_id, saldo + 1, 'EFECTIVO' FROM v_saldo_cuota
-    WHERE socio_id = (SELECT titular FROM ctx) AND saldo > 0 LIMIT 1
+    WHERE saldo > 0 ORDER BY saldo DESC, cuota_id LIMIT 1
 $q$, 'GR011');
 
 SELECT pg_temp.debe_fallar('P03', 'Segunda cuota de mantenimiento en el mismo mes', $q$

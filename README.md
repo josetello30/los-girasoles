@@ -25,7 +25,7 @@ flowchart LR
 |---|---|---|
 | 0 | Análisis, MER y arquitectura | ✅ |
 | 1 | Base de datos, semilla de datos, Docker | ✅ |
-| 2 | Backend: autenticación, socios, reservas, pagos, validación de acceso | ⏳ |
+| 2 | Backend: autenticación, socios, reservas, pagos, validación de acceso | ✅ |
 | 3 | IoT: garita ESP32 + RFID simulada en Wokwi | ⏳ |
 | 4 | App móvil Expo | ⏳ |
 | 5 | Dashboard Streamlit + modelo de riesgo de morosidad | ⏳ |
@@ -48,12 +48,16 @@ los-girasoles/
 │   │   └── 06_roles.sh        # roles con mínimo privilegio
 │   └── tests/
 │       └── pruebas_integridad.sql
-├── backend/               # Sprint 2
+├── backend/               # API REST Node.js + Express (Sprint 2)
+│   ├── src/modules/       # auth, socios, reservas, pagos, accesos, invitados...
+│   └── tests/             # 56 pruebas automáticas (Jest + Supertest)
 ├── iot/                   # Sprint 3
 ├── mobile/                # Sprint 4
 ├── dashboard/             # Sprint 5
 └── docs/
-    └── MER.md             # modelo entidad-relación y reglas de negocio
+    ├── MER.md             # modelo entidad-relación y reglas de negocio
+    ├── API.md             # referencia de todos los endpoints
+    └── sprints/           # historias, decisiones y evidencias por sprint
 ```
 
 ## Puesta en marcha en Fedora Linux
@@ -93,13 +97,13 @@ cd los-girasoles
 make up
 ```
 
-`make up` crea el archivo `.env` desde `.env.example`, descarga las imágenes y crea la base de datos con
-todos los datos de demostración (la primera vez tarda ~1 minuto).
+`make up` crea el archivo `.env` desde `.env.example`, construye el backend, descarga las imágenes y crea
+la base de datos con todos los datos de demostración (la primera vez tarda unos minutos).
 
 Sin Make, el equivalente es:
 ```bash
 cp .env.example .env
-docker compose up -d
+docker compose up -d --build
 ```
 
 ### 3. Comprobar que todo funciona
@@ -107,7 +111,11 @@ docker compose up -d
 ```bash
 make estado      # KPIs: debe mostrar ~1500 socios, recaudación del mes, morosidad...
 make test-db     # 19 pruebas de integridad: todas deben decir [OK]
+make test-api    # 56 pruebas de la API: todas deben pasar
+curl localhost:3000/api/v1/health
 ```
+
+La referencia completa de la API, con ejemplos para probarla desde la terminal, está en [`docs/API.md`](docs/API.md).
 
 Abre **Adminer** en http://localhost:8080 para explorar la base de datos:
 
@@ -123,8 +131,9 @@ Abre **Adminer** en http://localhost:8080 para explorar la base de datos:
 
 ```bash
 git pull
-make reset       # solo si el sprint cambió archivos de database/init (borra y recrea la BD)
-make up
+make env         # agrega a tu .env las variables nuevas del sprint (no toca las tuyas)
+make up          # reconstruye lo que haya cambiado
+make reset       # SOLO si el sprint cambió archivos de database/init (borra y recrea la BD)
 ```
 
 > Los scripts de `database/init` solo se ejecutan cuando el volumen está **vacío**.
@@ -167,7 +176,9 @@ La semilla genera datos **relativos a la fecha actual**, así el dashboard siemp
 | Adminer: `could not translate host name "postgres"` | El contenedor de la BD no arrancó (revisa `docker compose ps`) | Mira `docker compose logs postgres`; si es el puerto, ver fila anterior |
 | Cambié un `.sql` y no se refleja | Los scripts solo corren con el volumen vacío | `make reset` |
 | `permission denied ... docker.sock` | Tu usuario no está en el grupo docker | `sudo usermod -aG docker $USER` y vuelve a iniciar sesión |
-| Expo Go (celular) no llega a la API | firewalld bloquea el puerto | `sudo firewall-cmd --add-port=3000/tcp --permanent && sudo firewall-cmd --reload` (Sprint 4) |
+| El celular (Expo Go) o Wokwi no llegan a la API | firewalld bloquea el puerto 3000 | `sudo firewall-cmd --add-port=3000/tcp --permanent && sudo firewall-cmd --reload && sudo systemctl restart docker && make up` |
+| Tras recargar firewalld los contenedores no se ven entre sí | firewalld borra las reglas de red de Docker | `sudo systemctl restart docker && make up` (siempre después de `firewall-cmd --reload`) |
+| `Define JWT_SECRET en .env` al levantar | Tu `.env` es de un sprint anterior | `make env` |
 
 ## Equipo
 

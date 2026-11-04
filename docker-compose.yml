@@ -62,6 +62,54 @@ services:
       postgres:
         condition: service_healthy
 
+  # ---------------------------------------------------------------------------
+  # Backend: API REST Node.js + Express (http://localhost:3000/api/v1)
+  # Se conecta con el rol de mínimo privilegio, nunca como superusuario.
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      target: produccion
+    image: girasoles-backend
+    container_name: girasoles-backend
+    restart: unless-stopped
+    environment: &entorno-backend
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${APP_DB_USER}
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      JWT_SECRET: "${JWT_SECRET:?Define JWT_SECRET en .env - ejecuta make env}"
+      JWT_EXPIRA: ${JWT_EXPIRA:-8h}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      RESERVA_PENDIENTE_MINUTOS: ${RESERVA_PENDIENTE_MINUTOS:-30}
+      TZ: America/Lima
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ---------------------------------------------------------------------------
+  # Pruebas automáticas de la API (solo se ejecuta con: make test-api)
+  # ---------------------------------------------------------------------------
+  backend-pruebas:
+    build:
+      context: ./backend
+      target: pruebas
+    image: girasoles-backend-pruebas
+    profiles: ["pruebas"]
+    environment: *entorno-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:
     name: girasoles-pgdata

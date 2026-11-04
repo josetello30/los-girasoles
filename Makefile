@@ -10,7 +10,7 @@ COMPOSE ?= docker compose
 API_PUERTO := $(or $(BACKEND_PORT),3000)
 API_URL := http://localhost:$(API_PUERTO)/api/v1
 
-.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test estado tarjeta
+.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test estado tarjeta app
 
 ayuda:            ## Muestra esta ayuda
 	@grep -hE '^[a-z-]+:.*## ' Makefile | awk 'BEGIN{FS=":.*## "}{printf "  \033[32m%-10s\033[0m %s\n", $$1, $$2}'
@@ -67,3 +67,6 @@ test: test-db test-api  ## Ejecuta todas las pruebas
 
 estado:           ## Muestra los KPIs principales (comprobación rápida)
 	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) -x -c "SELECT * FROM v_kpi_resumen"
+
+app:              ## Abre la app móvil con Expo (escanea el QR con Expo Go)
+	cd mobile && npm install --no-fund --no-audit && npx expo start

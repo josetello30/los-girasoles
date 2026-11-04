@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "Los Girasoles",
+    "slug": "los-girasoles",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "girasoles",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#14591A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "pe.edu.usil.girasoles"
+    },
+    "android": {
+      "package": "pe.edu.usil.girasoles",
+      "adaptiveIcon": {
+        "backgroundColor": "#14591A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "output": "single",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

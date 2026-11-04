@@ -27,7 +27,7 @@ flowchart LR
 | 1 | Base de datos, semilla de datos, Docker | ✅ |
 | 2 | Backend: autenticación, socios, reservas, pagos, validación de acceso | ✅ |
 | 3 | IoT: garita ESP32 + RFID simulada en Wokwi | ✅ |
-| 4 | App móvil Expo | ⏳ |
+| 4 | App móvil Expo | ✅ |
 | 5 | Dashboard Streamlit + modelo de riesgo de morosidad | ⏳ |
 | 6 | Pruebas, evidencias e informe final | ⏳ |
 
@@ -53,7 +53,7 @@ los-girasoles/
 │   ├── src/modules/       # auth, socios, reservas, pagos, accesos, invitados...
 │   └── tests/             # 56 pruebas automáticas (Jest + Supertest)
 ├── iot/garita-esp32/     # firmware ESP32 (PlatformIO) + circuito Wokwi (Sprint 3)
-├── mobile/                # Sprint 4
+├── mobile/                # app React Native + Expo SDK 58 (Sprint 4)
 ├── dashboard/             # Sprint 5
 └── docs/
     ├── MER.md             # modelo entidad-relación y reglas de negocio
@@ -140,6 +140,20 @@ make reset       # SOLO si el sprint cambió archivos de database/init (borra y 
 
 > Los scripts de `database/init` solo se ejecutan cuando el volumen está **vacío**.
 > Si cambian, hay que ejecutar `make reset` para verlos aplicados.
+
+### 5. App móvil
+
+```bash
+make app         # instala dependencias y abre Expo: escanea el QR con Expo Go
+```
+Guía completa (Node.js en Fedora, Expo Go, problemas de red): [`mobile/README.md`](mobile/README.md).
+
+<p align="center">
+  <img src="docs/capturas/app-movil/02_inicio.png" width="180" alt="Inicio">
+  <img src="docs/capturas/app-movil/03_qr.png" width="180" alt="QR dinámico">
+  <img src="docs/capturas/app-movil/05_franjas.png" width="180" alt="Reservas">
+  <img src="docs/capturas/app-movil/09_pagos.png" width="180" alt="Pagos">
+</p>
 
 ## Credenciales de demostración
 

@@ -32,7 +32,7 @@ services:
       - -c
       - log_min_duration_statement=500   # registra consultas lentas (> 500 ms)
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       # Los scripts se ejecutan solo la PRIMERA vez (volumen vacío).

@@ -163,7 +163,8 @@ La semilla genera datos **relativos a la fecha actual**, así el dashboard siemp
 | Síntoma | Causa probable | Solución |
 |---|---|---|
 | `permission denied` al leer `/docker-entrypoint-initdb.d` | SELinux bloquea el volumen | Verifica que el `docker-compose.yml` tenga `:Z` en los volúmenes |
-| `port is already allocated` en 5432 | Ya tienes otro PostgreSQL | Cambia `POSTGRES_PORT=5433` en `.env` |
+| `address already in use` en el puerto 5433 | Otro programa usa ese puerto (`sudo ss -ltnp \| grep 5433`) | Cambia `POSTGRES_PORT` en `.env` (ej. 5434) y `docker compose up -d` |
+| Adminer: `could not translate host name "postgres"` | El contenedor de la BD no arrancó (revisa `docker compose ps`) | Mira `docker compose logs postgres`; si es el puerto, ver fila anterior |
 | Cambié un `.sql` y no se refleja | Los scripts solo corren con el volumen vacío | `make reset` |
 | `permission denied ... docker.sock` | Tu usuario no está en el grupo docker | `sudo usermod -aG docker $USER` y vuelve a iniciar sesión |
 | Expo Go (celular) no llega a la API | firewalld bloquea el puerto | `sudo firewall-cmd --add-port=3000/tcp --permanent && sudo firewall-cmd --reload` (Sprint 4) |

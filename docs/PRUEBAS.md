@@ -114,6 +114,7 @@ los vuelve a medir en el servidor Fedora.
 | 2 | Un cuerpo mayor a 100 KB devolvía **500** (error del servidor) en lugar de **413** | SEG-03 | El manejador de errores lo traduce a 413 con mensaje en español |
 | 3 | Dos pruebas de la API esperaban una deuda fija de S/ 540 del socio moroso, pero la semilla es relativa a la fecha: al vencer cada mes la deuda sube y la prueba fallaba | Al ejecutar la suite el 04/11 | La prueba compara contra su propio estado de cuenta |
 | 4 | La prueba de invitados usaba siempre la misma familia, que agotaba su cupo de 8 invitados al mes tras unas pocas ejecuciones | Al ejecutar la suite varias veces seguidas | Elige una familia con cupo disponible |
+| 5 | La prueba de BD P02 dependía de que el socio de demo 00247 (puntual) tuviera una cuota pendiente, lo que no ocurre en los primeros días del mes | Primera ejecución del pipeline de integración continua | Usa cualquier cuota con saldo |
 
 ## Pruebas manuales de demostración
 

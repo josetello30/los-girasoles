@@ -36,6 +36,15 @@ Detalle, matriz de trazabilidad y tablas de carga: [`docs/PRUEBAS.md`](../PRUEBA
 3. **Pruebas frágiles:** dos pruebas de la API dependían del día del mes (deuda fija de S/ 540) y otra
    agotaba el cupo de invitados de una familia tras unas pocas ejecuciones. Ahora son independientes
    de la fecha y del número de ejecuciones (verificado con 3 ejecuciones seguidas).
+4. **Detectado por la integración continua:** la prueba de BD P02 dependía de que el socio de demo
+   00247 tuviera una cuota pendiente; en los primeros días del mes ya la pagó. Ahora usa cualquier
+   cuota con saldo.
+
+## Integración continua (DevOps)
+
+`.github/workflows/ci.yml` compila el firmware, revisa la app y ejecuta todas las pruebas sobre el
+sistema levantado con Docker en cada `push` a `main`. Primera ejecución completa en verde:
+firmware 48 s, app 33 s, sistema 148 s (19 + 58 + 12 + 45 pruebas y carga con p95 de 206 ms).
 
 ## Decisiones técnicas
 

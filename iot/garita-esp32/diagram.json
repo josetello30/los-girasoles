@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "author": "Equipo Los Girasoles - USIL",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "board-mfrc522",
+      "id": "rfid",
+      "top": -40,
+      "left": -330,
+      "rotate": 0,
+      "attrs": {
+        "uid": "A1:B2:C3:D4"
+      }
+    },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd",
+      "top": -230,
+      "left": 100,
+      "attrs": {
+        "pins": "i2c"
+      }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "tranquera",
+      "top": 40,
+      "left": 300,
+      "attrs": {
+        "hornColor": "#ffcc00"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledVerde",
+      "top": 200,
+      "left": 230,
+      "attrs": {
+        "color": "green",
+        "label": "Permitido"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledRojo",
+      "top": 200,
+      "left": 290,
+      "attrs": {
+        "color": "red",
+        "label": "Denegado"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 280,
+      "left": 220,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 280,
+      "left": 280,
+      "rotate": 90,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "zumbador",
+      "top": 230,
+      "left": -190,
+      "attrs": {
+        "volume": "0.2"
+      }
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "sentido",
+      "top": 230,
+      "left": -80,
+      "attrs": {
+        "value": "1"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "rfid:SDA",
+      "esp:5",
+      "violet",
+      []
+    ],
+    [
+      "rfid:SCK",
+      "esp:18",
+      "orange",
+      []
+    ],
+    [
+      "rfid:MOSI",
+      "esp:23",
+      "blue",
+      []
+    ],
+    [
+      "rfid:MISO",
+      "esp:19",
+      "green",
+      []
+    ],
+    [
+      "rfid:RST",
+      "esp:4",
+      "white",
+      []
+    ],
+    [
+      "rfid:3.3V",
+      "esp:3V3",
+      "red",
+      []
+    ],
+    [
+      "rfid:GND",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "lcd:SDA",
+      "esp:21",
+      "blue",
+      []
+    ],
+    [
+      "lcd:SCL",
+      "esp:22",
+      "purple",
+      []
+    ],
+    [
+      "lcd:VCC",
+      "esp:5V",
+      "red",
+      []
+    ],
+    [
+      "lcd:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "tranquera:PWM",
+      "esp:13",
+      "orange",
+      []
+    ],
+    [
+      "tranquera:V+",
+      "esp:5V",
+      "red",
+      []
+    ],
+    [
+      "tranquera:GND",
+      "esp:GND.2",
+      "black",
+      []
+    ],
+    [
+      "esp:26",
+      "ledVerde:A",
+      "green",
+      []
+    ],
+    [
+      "ledVerde:C",
+      "r1:1",
+      "black",
+      []
+    ],
+    [
+      "r1:2",
+      "esp:GND.3",
+      "black",
+      []
+    ],
+    [
+      "esp:27",
+      "ledRojo:A",
+      "red",
+      []
+    ],
+    [
+      "ledRojo:C",
+      "r2:1",
+      "black",
+      []
+    ],
+    [
+      "r2:2",
+      "esp:GND.3",
+      "black",
+      []
+    ],
+    [
+      "esp:25",
+      "zumbador:2",
+      "gold",
+      []
+    ],
+    [
+      "zumbador:1",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "sentido:2",
+      "esp:33",
+      "cyan",
+      []
+    ],
+    [
+      "sentido:1",
+      "esp:GND.1",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {}
+}

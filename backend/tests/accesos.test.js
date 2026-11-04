@@ -33,7 +33,7 @@ describe('Garita: tarjetas RFID', () => {
   });
 
   test('G05 tarjeta reportada como perdida: denegado', async () => {
-    const res = await garita({ uid: 'DEADBEEF' });
+    const res = await garita({ uid: 'AABBCCDD' }); // tarjeta roja de Wokwi
     expect(res.status).toBe(403);
     expect(res.body).toMatchObject({ permitido: false, mensaje: 'Tarjeta perdida' });
   });
@@ -45,19 +45,27 @@ describe('Garita: tarjetas RFID', () => {
   });
 
   test('G07 tarjeta de personal de limpieza: permitido como trabajador', async () => {
-    const res = await garita({ uid: 'C0FFEE01', direccion: 'ENTRADA' });
+    const res = await garita({ uid: '55667788', direccion: 'ENTRADA' }); // tarjeta amarilla
     expect(res.status).toBe(200);
     expect(res.body.tipo).toBe('TRABAJADOR');
   });
 
   test('G08 la morosidad NO impide el ingreso (club residencial)', async () => {
-    const { rows } = await db.query(
-      `SELECT c.uid_tarjeta FROM credencial_rfid c JOIN socio s ON s.id = c.socio_id
-       WHERE s.numero_socio = '00289' AND c.estado = 'ACTIVA'`,
-    );
-    const res = await garita({ uid: rows[0].uid_tarjeta });
+    const res = await garita({ uid: '11223344' }); // tarjeta verde: socio 00289, moroso
     expect(res.status).toBe(200);
-    expect(res.body.permitido).toBe(true);
+    expect(res.body).toMatchObject({ permitido: true, persona: 'Roberto Silva Castro' });
+  });
+
+  test('G10 tarjeta NFC de 7 bytes de un socio suspendido: denegado', async () => {
+    const res = await garita({ uid: '04112233445566' });
+    expect(res.status).toBe(403);
+    expect(res.body).toMatchObject({ permitido: false, mensaje: 'Socio suspendido' });
+  });
+
+  test('G11 llavero C0FFEE99 no registrado: denegado', async () => {
+    const res = await garita({ uid: 'C0FFEE99' });
+    expect(res.status).toBe(403);
+    expect(res.body.mensaje).toBe('No registrada');
   });
 
   test('G09 cada intento queda en el log con su latencia', async () => {
@@ -121,7 +129,7 @@ describe('QR dinámico (RF01)', () => {
 
 describe('RNF02: tiempo de respuesta de la validación (< 2 s)', () => {
   test('P01 100 validaciones consecutivas con p95 bajo 2000 ms', async () => {
-    const uids = ['A1B2C3D4', 'DEADBEEF', 'C0FFEE01', '0BADCAFE'];
+    const uids = ['A1B2C3D4', 'AABBCCDD', '55667788', 'C0FFEE99', '11223344', '04112233445566'];
     const tiempos = [];
     for (let i = 0; i < 100; i += 1) {
       const inicio = process.hrtime.bigint();

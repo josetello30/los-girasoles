@@ -1,0 +1,10 @@
+# Configuración del simulador Wokwi para VS Code.
+# El firmware lo genera PlatformIO al compilar (Build).
+[wokwi]
+version = 1
+firmware = '.pio/build/garita/firmware.bin'
+elf = '.pio/build/garita/firmware.elf'
+
+# Wokwi para VS Code trae integrado su "Private IoT Gateway": el WiFi virtual del
+# ESP32 sale a tu red local y 'host.wokwi.internal' apunta a tu PC, donde Docker
+# publica el backend en el puerto 3000. No hace falta configurar nada más aquí.

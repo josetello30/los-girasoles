@@ -26,7 +26,7 @@ flowchart LR
 | 0 | Análisis, MER y arquitectura | ✅ |
 | 1 | Base de datos, semilla de datos, Docker | ✅ |
 | 2 | Backend: autenticación, socios, reservas, pagos, validación de acceso | ✅ |
-| 3 | IoT: garita ESP32 + RFID simulada en Wokwi | ⏳ |
+| 3 | IoT: garita ESP32 + RFID simulada en Wokwi | ✅ |
 | 4 | App móvil Expo | ⏳ |
 | 5 | Dashboard Streamlit + modelo de riesgo de morosidad | ⏳ |
 | 6 | Pruebas, evidencias e informe final | ⏳ |
@@ -45,13 +45,14 @@ los-girasoles/
 │   │   ├── 03_funciones.sql   # triggers, emisión de cuotas, nómina
 │   │   ├── 04_vistas.sql      # vistas para el dashboard y estados de cuenta
 │   │   ├── 05_semilla.sql     # datos ficticios de demostración
-│   │   └── 06_roles.sh        # roles con mínimo privilegio
+│   │   ├── 06_roles.sh        # roles con mínimo privilegio
+│   │   └── 07_tarjetas_wokwi.sql  # UIDs de las tarjetas del simulador
 │   └── tests/
 │       └── pruebas_integridad.sql
 ├── backend/               # API REST Node.js + Express (Sprint 2)
 │   ├── src/modules/       # auth, socios, reservas, pagos, accesos, invitados...
 │   └── tests/             # 56 pruebas automáticas (Jest + Supertest)
-├── iot/                   # Sprint 3
+├── iot/garita-esp32/     # firmware ESP32 (PlatformIO) + circuito Wokwi (Sprint 3)
 ├── mobile/                # Sprint 4
 ├── dashboard/             # Sprint 5
 └── docs/
@@ -132,6 +133,7 @@ Abre **Adminer** en http://localhost:8080 para explorar la base de datos:
 ```bash
 git pull
 make env         # agrega a tu .env las variables nuevas del sprint (no toca las tuyas)
+make migrar      # aplica los scripts nuevos de la BD sin borrar tus datos
 make up          # reconstruye lo que haya cambiado
 make reset       # SOLO si el sprint cambió archivos de database/init (borra y recrea la BD)
 ```
@@ -151,11 +153,17 @@ Todos los datos son **ficticios**. Estas credenciales son solo para el entorno d
 | Administrador | `admin` | `Admin2026!` | Panel administrativo |
 | Guardia | `guardia01` | `Guardia2026!` | Validación de QR en garita |
 
-| Tarjeta RFID (simulador) | Resultado esperado |
-|---|---|
-| `A1B2C3D4` | Socio 00247, acceso permitido |
-| `DEADBEEF` | Tarjeta perdida del socio 00247, acceso denegado |
-| `C0FFEE01` | Trabajador de limpieza, acceso permitido (asistencia) |
+| Tarjeta del simulador Wokwi | UID | Resultado esperado |
+|---|---|---|
+| Azul | `A1B2C3D4` | Socio 00247: permitido |
+| Verde | `11223344` | Socio 00289 moroso: **permitido** (la deuda no impide entrar) |
+| Amarilla | `55667788` | Personal de limpieza: permitido (asistencia) |
+| Roja | `AABBCCDD` | Tarjeta perdida del socio 00247: denegado |
+| Llavero | `C0FFEE99` | No registrada: denegado |
+| Tag NFC | `04112233445566` | Socio 00150 suspendido: denegado |
+
+Puedes probar cualquiera sin el simulador: `make tarjeta UID=11223344`.
+La guía del simulador está en [`iot/garita-esp32/README.md`](iot/garita-esp32/README.md).
 
 ## Datos de demostración
 

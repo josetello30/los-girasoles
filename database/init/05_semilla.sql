@@ -270,10 +270,11 @@ INSERT INTO credencial_rfid (uid_tarjeta, trabajador_id, emitida_en)
 SELECT upper(substr(md5('trab-' || id::text), 1, 8)), id, fecha_ingreso::timestamptz
 FROM trabajador;
 
--- Tarjetas fijas que usa el simulador Wokwi (deben coincidir con iot/garita-esp32/include/config.h)
---   A1B2C3D4 -> socio 00247, tarjeta activa
---   DEADBEEF -> socio 00247, tarjeta antigua reportada como PERDIDA (acceso denegado)
---   C0FFEE01 -> trabajador de limpieza, tarjeta activa
+-- Tarjetas fijas de demostración. El script 07_tarjetas_wokwi.sql les asigna
+-- luego los UIDs de las tarjetas del lector RC522 de Wokwi:
+--   A1B2C3D4 -> socio 00247, tarjeta activa                     (tarjeta azul)
+--   DEADBEEF -> socio 00247, tarjeta reportada como PERDIDA     (pasa a AABBCCDD, tarjeta roja)
+--   C0FFEE01 -> trabajador de limpieza, tarjeta activa          (pasa a 55667788, tarjeta amarilla)
 INSERT INTO credencial_rfid (uid_tarjeta, socio_id, estado, emitida_en, revocada_en)
 SELECT 'A1B2C3D4', id, 'ACTIVA'::estado_credencial, now() - INTERVAL '40 days', NULL::timestamptz
 FROM socio WHERE numero_socio = '00247'

@@ -10,7 +10,7 @@ COMPOSE ?= docker compose
 API_PUERTO := $(or $(BACKEND_PORT),3000)
 API_URL := http://localhost:$(API_PUERTO)/api/v1
 
-.PHONY: ayuda env up down logs logs-api reset psql test-db test-api test estado
+.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test estado tarjeta
 
 ayuda:            ## Muestra esta ayuda
 	@grep -hE '^[a-z-]+:.*## ' Makefile | awk 'BEGIN{FS=":.*## "}{printf "  \033[32m%-10s\033[0m %s\n", $$1, $$2}'
@@ -41,6 +41,17 @@ logs-api:         ## Muestra los logs del backend (cada solicitud con su duraciÃ
 reset:            ## BORRA la BD y la vuelve a crear con la semilla (Ãºtil tras cambiar los .sql)
 	$(COMPOSE) down -v
 	$(MAKE) up
+
+migrar:           ## Aplica los scripts 07+ de database/init sobre la BD actual (sin borrar datos)
+	@for f in $$(ls database/init/0[7-9]_*.sql 2>/dev/null); do \
+		echo "-> $$f"; \
+		$(COMPOSE) exec -T postgres psql -q -v ON_ERROR_STOP=1 -U $(POSTGRES_USER) -d $(POSTGRES_DB) < $$f || exit 1; \
+	done
+
+tarjeta:          ## Simula la garita leyendo una tarjeta sin Wokwi: make tarjeta UID=A1B2C3D4
+	@curl -s -X POST $(API_URL)/accesos/validar \
+		-H 'X-Device-Key: gir-dev-garita-principal-2026' -H 'Content-Type: application/json' \
+		-d '{"uid":"$(or $(UID),A1B2C3D4)"}' -w '\nHTTP %{http_code} en %{time_total}s\n'
 
 psql:             ## Abre una consola SQL dentro del contenedor
 	$(COMPOSE) exec postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB)

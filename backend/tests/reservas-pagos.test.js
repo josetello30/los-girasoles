@@ -166,8 +166,8 @@ describe('Estado de cuenta y pagos', () => {
   });
 
   test('E02 Yape con código inválido es rechazado', async () => {
-    const socio = await socioLibre(5);
-    const token = await login(socio.numero_socio);
+    // El moroso siempre tiene cuotas pendientes; un socio al día puede no tener ninguna a fin de mes
+    const token = await login('00289');
     const { body } = await api(token).get('/pagos/estado-cuenta');
     const cuota = body.por_pagar[0];
     const res = await api(token).post('/pagos', {

@@ -56,6 +56,7 @@ los-girasoles/
 │   ├── src/modules/       # auth, socios, reservas, pagos, accesos, invitados...
 │   └── tests/             # 58 pruebas automáticas (Jest + Supertest)
 ├── iot/garita-esp32/     # firmware ESP32 (PlatformIO) + circuito Wokwi (Sprint 3)
+├── iot/lector-qr/        # lector QR con cámara web para la garita en Wokwi (OpenCV)
 ├── mobile/                # app React Native + Expo SDK 58 (Sprint 4)
 ├── dashboard/             # panel administrativo Streamlit + Pandas (Sprint 5)
 │   ├── paginas/           # dashboard, morosidad e IA, accesos en vivo, reservas, pagos...
@@ -218,6 +219,11 @@ Todos los datos son **ficticios**. Estas credenciales son solo para el entorno d
 
 Puedes probar cualquiera sin el simulador: `make tarjeta UID=11223344`.
 La guía del simulador está en [`iot/garita-esp32/README.md`](iot/garita-esp32/README.md).
+
+**QR con la cámara web:** con el simulador corriendo, ejecuta `make camara` y muestra el QR de la app
+a la cámara. La garita de Wokwi lo valida y reacciona (LCD, LED, tranquera). Si tu Fedora es una
+máquina virtual, primero pásale la cámara (VirtualBox: *Dispositivos → Cámaras web*). Detalles en
+[`iot/lector-qr/README.md`](iot/lector-qr/README.md).
 
 ## Datos de demostración
 

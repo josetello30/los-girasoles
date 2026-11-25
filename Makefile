@@ -16,7 +16,7 @@ COMO_YO := --user $$(id -u):$$(id -g)
 API_PUERTO := $(or $(BACKEND_PORT),3000)
 API_URL := http://localhost:$(API_PUERTO)/api/v1
 
-.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test-dashboard test-e2e carga evidencias test estado tarjeta app logs-panel
+.PHONY: ayuda env up down logs logs-api reset migrar psql test-db test-api test-dashboard test-e2e carga evidencias camara test-lector test estado tarjeta app logs-panel
 
 ayuda:            ## Muestra esta ayuda
 	@grep -hE '^[a-z-]+:.*## ' Makefile | awk 'BEGIN{FS=":.*## "}{printf "  \033[32m%-14s\033[0m %s\n", $$1, $$2}'
@@ -93,12 +93,24 @@ evidencias:       ## Ejecuta TODAS las pruebas y guarda los resultados en docs/e
 	$(MAKE) --no-print-directory test-db | tee $(EVIDENCIAS)/bd.txt
 	$(MAKE) --no-print-directory test-api 2>&1 | tee $(EVIDENCIAS)/api.txt
 	$(MAKE) --no-print-directory test-dashboard 2>&1 | tee $(EVIDENCIAS)/modelo.txt
+	$(MAKE) --no-print-directory test-lector 2>&1 | tee $(EVIDENCIAS)/lector.txt
 	$(MAKE) --no-print-directory test-e2e
 	$(MAKE) --no-print-directory carga
 	@echo "Evidencias guardadas en $(EVIDENCIAS)/" 
 
 estado:           ## Muestra los KPIs principales (comprobación rápida)
 	$(COMPOSE) exec -T postgres psql -U $(POSTGRES_USER) -d $(POSTGRES_DB) -x -c "SELECT * FROM v_kpi_resumen"
+
+CAMARA ?= 0
+camara:           ## Lector QR con la cámara web para la garita en Wokwi (CAMARA=1 para otra cámara)
+	@cd iot/lector-qr && { [ -d .venv ] || python3 -m venv .venv; } \
+		&& .venv/bin/pip install -q --disable-pip-version-check -r requirements.txt
+	cd iot/lector-qr && QT_QPA_PLATFORM=xcb .venv/bin/python lector_qr.py --camara $(CAMARA)
+
+test-lector:      ## Pruebas del lector QR (sin cámara ni Wokwi)
+	@cd iot/lector-qr && { [ -d .venv ] || python3 -m venv .venv; } \
+		&& .venv/bin/pip install -q --disable-pip-version-check -r requirements.txt -r requirements-dev.txt
+	cd iot/lector-qr && .venv/bin/pytest -v
 
 app:              ## Abre la app móvil con Expo (escanea el QR con Expo Go)
 	cd mobile && npm install --no-fund --no-audit && npx expo start

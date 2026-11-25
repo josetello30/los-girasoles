@@ -1,0 +1,3 @@
+# Pruebas (se instalan junto a requirements.txt o a opencv-python-headless en la CI)
+qrcode==8.2
+pytest==9.2.0

@@ -8,6 +8,7 @@ Salidas generadas por `make evidencias` (se sobrescriben en cada ejecución).
 | `bd.txt` | 19 pruebas de integridad de PostgreSQL |
 | `api.txt` | 58 pruebas de la API (Jest + Supertest) |
 | `modelo.txt` | 12 pruebas del modelo de riesgo (pytest) |
+| `lector.txt` | 19 pruebas del lector QR con cámara web (pytest) |
 | `e2e.txt` | 45 pruebas de punta a punta y de seguridad |
 | `carga-garita.md` / `.json` | Prueba de carga de la garita (RNF02) |
 

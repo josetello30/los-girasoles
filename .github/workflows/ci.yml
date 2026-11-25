@@ -4,6 +4,7 @@
 # En cada push o pull request a main, GitHub ejecuta en sus servidores:
 #   1. firmware   -> compila el firmware del ESP32 con PlatformIO
 #   2. app-movil  -> revisa tipos (TypeScript) y estilo (ESLint) de la app Expo
+#   2b. lector-qr -> prueba el lector QR con cámara (QR simulados y un Wokwi falso)
 #   3. sistema    -> levanta todo con Docker (make up), igual que en Fedora, y
 #                    ejecuta las pruebas de BD, API, modelo de IA, punta a punta,
 #                    seguridad y carga. Las evidencias quedan como artefacto.
@@ -45,6 +46,23 @@ jobs:
         run: pip install platformio
       - name: Compilar el firmware de la garita
         run: pio run -d iot/garita-esp32
+
+  lector-qr:
+    name: Lector QR con cámara (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: iot/lector-qr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Instalar dependencias (OpenCV sin ventana gráfica)
+        run: pip install opencv-python-headless==5.1.0.95 numpy==2.5.5 -r requirements-dev.txt
+      - name: Pruebas con QR simulados, video de prueba y un Wokwi falso
+        run: pytest -v
 
   app-movil:
     name: App móvil (TypeScript + ESLint)

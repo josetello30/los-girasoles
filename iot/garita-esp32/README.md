@@ -100,6 +100,12 @@ Escribe en la terminal del simulador y presiona Enter:
 | `estado` | Muestra la red y las **métricas de latencia** (evidencia del RNF02) |
 | `ayuda` | Lista los comandos y las tarjetas |
 
+### QR con la cámara web
+
+En vez de copiar el código, puedes **mostrar el QR de la app a la cámara web**: `make camara` (desde la raíz del repositorio)
+lo lee y lo escribe en este mismo puerto serie a través de `localhost:4000` (`rfc2217ServerPort` en `wokwi.toml`).
+Guía completa: [`iot/lector-qr/README.md`](../lector-qr/README.md).
+
 Ejemplo de salida por cada acceso:
 ```
 [acceso] RFID A1B2C3D4 ENTRADA -> PERMITIDO (HTTP 200) "Hola Jose" José Miguel Quispe Soto | total 187 ms | servidor 3 ms

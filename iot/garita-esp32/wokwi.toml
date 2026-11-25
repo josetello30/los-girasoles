@@ -8,3 +8,8 @@ elf = '.pio/build/garita/firmware.elf'
 # Wokwi para VS Code trae integrado su "Private IoT Gateway": el WiFi virtual del
 # ESP32 sale a tu red local y 'host.wokwi.internal' apunta a tu PC, donde Docker
 # publica el backend en el puerto 3000. No hace falta configurar nada más aquí.
+
+# Puerto serie del ESP32 expuesto como servidor TCP (RFC2217) en localhost:4000.
+# Lo usa el lector QR con cámara web (iot/lector-qr): escribe en este puerto el
+# código del QR que ve la cámara, igual que si se pegara en el monitor serial.
+rfc2217ServerPort = 4000

@@ -210,7 +210,7 @@ def noticias(motor) -> pd.DataFrame:
 
 def eventos(motor) -> pd.DataFrame:
     return consultar(motor, """
-        SELECT e.titulo, e.categoria, e.inicia_en, e.lugar, e.cupo,
+        SELECT e.id, e.imagen_url, e.titulo, e.categoria, e.inicia_en, e.lugar, e.cupo,
                (SELECT count(*) FROM inscripcion_evento ie WHERE ie.evento_id = e.id AND ie.estado = 'INSCRITO') AS inscritos
         FROM evento e WHERE e.termina_en >= now() ORDER BY e.inicia_en
     """)
@@ -232,3 +232,17 @@ def asistencia(motor, dias: int = 30) -> pd.DataFrame:
         WHERE fecha >= CURRENT_DATE - :dias
         GROUP BY 1, 2 ORDER BY 2, 1
     """, dias=dias)
+
+
+def pedidos_tienda(motor) -> pd.DataFrame:
+    return consultar(motor, """
+        SELECT pe.creado_en, s.numero_socio, s.nombres || ' ' || s.apellidos AS socio, pe.estado, pe.total,
+               string_agg(d.cantidad || ' x ' || pr.nombre, ', ' ORDER BY pr.nombre) AS detalle
+        FROM pedido pe
+        JOIN socio s ON s.id = pe.socio_id
+        JOIN detalle_pedido d ON d.pedido_id = pe.id
+        JOIN producto pr ON pr.id = d.producto_id
+        GROUP BY pe.id, s.numero_socio, s.nombres, s.apellidos
+        ORDER BY pe.creado_en DESC
+        LIMIT 100
+    """)

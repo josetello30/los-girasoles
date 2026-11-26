@@ -33,3 +33,12 @@ function detectarUrlApi(): string {
 
 export const URL_API = detectarUrlApi();
 export const TIEMPO_ESPERA_MS = 10000;
+
+/**
+ * URL completa de una imagen. En la BD se guarda la ruta relativa que devuelve
+ * POST /archivos ("archivos/<uuid>.jpg"); también se aceptan URLs https externas.
+ */
+export function urlImagen(ruta: string | null | undefined): string | null {
+  if (!ruta) return null;
+  return /^https?:\/\//.test(ruta) ? ruta : `${URL_API}/${ruta}`;
+}

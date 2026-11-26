@@ -10,7 +10,7 @@
 import { describe, it, before } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  PANEL, cliente, login, garita, hoyLima, titularAlAzar, dniAleatorio, aptoParaLcd, solicitar,
+  API, PANEL, cliente, login, garita, hoyLima, titularAlAzar, dniAleatorio, aptoParaLcd, solicitar,
 } from '../lib/cliente.mjs';
 
 const RNF02_MS = 2000;
@@ -261,6 +261,42 @@ describe('E2E-08 · Invitado registrado en la app ingresa con su QR', () => {
     const r = await garita({ metodo: 'QR', credencial: reg.body.qr });
     assert.equal(r.status, 200, JSON.stringify(r.body));
     assert.equal(r.body.tipo, 'INVITADO');
+  });
+});
+
+describe('E2E-10 · Foto subida desde el panel aparece en la app', () => {
+  // PNG de 1x1 píxel
+  const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+  let restaurante;
+  let anterior;
+
+  it('el administrador sube la foto del restaurante y la asigna', async () => {
+    const subida = await fetch(`${API}/archivos`, {
+      method: 'POST', body: PNG,
+      headers: { Authorization: `Bearer ${admin}`, 'Content-Type': 'image/png' },
+    });
+    assert.equal(subida.status, 201);
+    const { ruta } = await subida.json();
+    const { body: servicios } = await cliente(admin).get('/servicios');
+    restaurante = servicios.find((s) => s.tipo === 'RESTAURANTE');
+    anterior = restaurante.imagen_url ?? null;
+    const r = await cliente(admin).patch(`/servicios/${restaurante.id}`, { imagen_url: ruta });
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+  });
+
+  it('el socio recibe la ruta en la app y descarga la imagen', async () => {
+    const { body } = await cliente(await login('00247')).get('/servicios');
+    const ruta = body.find((s) => s.id === restaurante.id).imagen_url;
+    assert.match(ruta, /^archivos\/[0-9a-f-]{36}\.png$/);
+    const img = await fetch(`${API}/${ruta}`);
+    assert.equal(img.status, 200);
+    assert.equal(img.headers.get('content-type'), 'image/png');
+    assert.equal(Buffer.compare(Buffer.from(await img.arrayBuffer()), PNG), 0);
+  });
+
+  it('se deja la foto como estaba (limpieza de la prueba)', async () => {
+    const r = await cliente(admin).patch(`/servicios/${restaurante.id}`, { imagen_url: anterior });
+    assert.equal(r.status, 200);
   });
 });
 

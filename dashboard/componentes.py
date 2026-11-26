@@ -103,3 +103,43 @@ def accion_api(metodo: str, ruta: str, cuerpo=None, exito: str | None = None):
 
 def sin_datos(mensaje: str = "Sin datos para mostrar") -> None:
     st.info(mensaje, icon=":material/info:")
+
+
+# ------------------------------------------------------------------ imágenes
+@st.cache_data(ttl=3600, show_spinner=False, max_entries=300)
+def _bytes_imagen(ruta: str) -> bytes | None:
+    return api.descargar_imagen(ruta)  # cada ruta es única e inmutable: se puede guardar en caché
+
+
+def mostrar_imagen(ruta: str | None, alto_vacio: int = 140, texto_vacio: str = "Sin imagen") -> None:
+    """Muestra la imagen guardada o un recuadro gris si no tiene."""
+    ruta = ruta if isinstance(ruta, str) and ruta else None  # Pandas trae NaN cuando no hay imagen
+    datos = _bytes_imagen(ruta) if ruta else None
+    if datos:
+        st.image(datos, width="stretch")
+    else:
+        st.markdown(
+            f"<div style='height:{alto_vacio}px;border-radius:8px;background:#ECEAE3;display:flex;"
+            f"align-items:center;justify-content:center;color:{TINTA_SUAVE};font-size:0.9rem'>{texto_vacio}</div>",
+            unsafe_allow_html=True,
+        )
+
+
+def selector_imagen(etiqueta: str = "Imagen", clave: str | None = None):
+    """Campo para elegir una foto de la PC (JPG, PNG o WebP, máx. 5 MB)."""
+    return st.file_uploader(etiqueta, type=["jpg", "jpeg", "png", "webp"], key=clave,
+                            help="JPG, PNG o WebP de hasta 5 MB. Se verá en la app de los socios.")
+
+
+def subir_imagen(archivo) -> str | None:
+    """Sube el archivo elegido y devuelve su ruta; muestra el error en español si falla."""
+    if archivo is None:
+        return None
+    try:
+        return api.subir_imagen(token(), archivo.getvalue(), archivo.name)
+    except api.ErrorApi as e:
+        if e.estado == 401:
+            st.session_state.pop("sesion", None)
+            st.rerun()
+        st.error(f"No se pudo subir la imagen: {e}", icon=":material/error:")
+        return None

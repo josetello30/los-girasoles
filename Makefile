@@ -27,8 +27,10 @@ env:              ## Crea .env o le agrega las variables nuevas de .env.example 
 		grep -q "^$$clave=" .env || { echo "$$clave=$$valor" >> .env; echo "  + $$clave agregada a .env"; }; \
 	done
 
-up: env           ## Construye y levanta todos los contenedores
+up: env           ## Construye y levanta todos los contenedores (y aplica las migraciones pendientes)
 	$(COMPOSE) up -d --build
+	@$(COMPOSE) exec -T postgres sh -c 'until pg_isready -q -h 127.0.0.1; do sleep 1; done'
+	@$(MAKE) --no-print-directory migrar >/dev/null
 	@echo "Esperando a la API..."
 	@for i in $$(seq 1 60); do curl -sf $(API_URL)/health >/dev/null 2>&1 && break; sleep 2; done
 	@curl -sf $(API_URL)/health >/dev/null 2>&1 \

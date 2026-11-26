@@ -22,7 +22,8 @@ function manejadorErrores(err, req, res, _next) {
 
   // Cuerpo mayor al límite de express.json (100 KB): es un error del cliente, no del servidor
   if (!error && err.type === 'entity.too.large') {
-    error = new ErrorApi(413, 'SOLICITUD_DEMASIADO_GRANDE', 'La solicitud supera el tamaño máximo permitido (100 KB)');
+    const maximo = err.limit >= 1024 * 1024 ? `${Math.round(err.limit / 1024 / 1024)} MB` : `${Math.round((err.limit || 102400) / 1024)} KB`;
+    error = new ErrorApi(413, 'SOLICITUD_DEMASIADO_GRANDE', `La solicitud supera el tamaño máximo permitido (${maximo})`);
   }
 
   if (!error) {

@@ -63,6 +63,8 @@ paginas = {
     "Administración": [
         st.Page("paginas/socios.py", title="Socios", icon=":material/groups:"),
         st.Page("paginas/comunicacion.py", title="Noticias y eventos", icon=":material/campaign:"),
+        st.Page("paginas/tienda.py", title="Tienda", icon=":material/storefront:"),
+        st.Page("paginas/servicios_club.py", title="Servicios del club", icon=":material/restaurant:"),
         st.Page("paginas/nomina.py", title="Nómina", icon=":material/badge:"),
     ],
 }

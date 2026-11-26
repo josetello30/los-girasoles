@@ -130,7 +130,19 @@ Límite: 8 invitados por familia al mes.
 | GET | `/eventos` | todos | Próximos, con `inscritos` y `estoy_inscrito` |
 | POST / DELETE | `/eventos/:id/inscripcion` | SOCIO | Inscribirse (`{ disciplina }`) / retirarse |
 | POST | `/eventos` | ADMIN | Crear evento |
-| GET | `/servicios` | todos | Posta, capilla, restaurante, administración |
+| PATCH | `/eventos/:id` | ADMIN | Cambiar `imagen_url`, título, descripción, lugar o `inscripciones_abiertas` |
+| GET | `/servicios` | todos | Posta, capilla, restaurante, administración (con `imagen_url`) |
+| PATCH | `/servicios/:id` | ADMIN | Cambiar `imagen_url`, descripción, horario o teléfono |
+
+### Imágenes
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| POST | `/archivos` | ADMIN | Cuerpo = bytes de la imagen (JPG, PNG o WebP, máx. 5 MB) → `{ ruta: "archivos/<uuid>.jpg" }`. El formato se comprueba por el contenido |
+| GET | `/archivos/:nombre` | público | Devuelve la imagen (caché de 1 año: el nombre nunca cambia de contenido) |
+
+Los campos `imagen_url` de eventos, productos y servicios guardan la `ruta` devuelta por `POST /archivos`
+(o una URL `https://` externa); `null` quita la imagen. Cada cliente la completa con su URL de la API:
+`<URL_API>/archivos/<uuid>.jpg`. Las imágenes viven en el volumen Docker `girasoles-archivos`.
 
 ### Tienda (simulada)
 | Método | Ruta | Rol | Descripción |
@@ -138,6 +150,9 @@ Límite: 8 invitados por familia al mes.
 | GET | `/tienda/productos` | todos | Catálogo con stock |
 | POST | `/tienda/pedidos` | SOCIO | `{ items: [{ producto_id, cantidad }] }` → pedido + cuota a pagar con `POST /pagos` |
 | GET | `/tienda/pedidos/mios` | SOCIO | Mis pedidos |
+| GET | `/tienda/admin/productos` | ADMIN | Todos los productos (también los ocultos) con unidades vendidas |
+| POST | `/tienda/productos` | ADMIN | Crear producto (`sku`, `nombre`, `categoria`, `precio`, `stock`, `imagen_url?`) |
+| PATCH | `/tienda/productos/:id` | ADMIN | Cambiar cualquier campo; `activo: false` lo oculta de la app |
 
 ### Nómina (simulada, solo ADMIN)
 | Método | Ruta | Descripción |

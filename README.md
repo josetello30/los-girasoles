@@ -54,7 +54,7 @@ los-girasoles/
 │       └── pruebas_integridad.sql
 ├── backend/               # API REST Node.js + Express (Sprint 2)
 │   ├── src/modules/       # auth, socios, reservas, pagos, accesos, invitados...
-│   └── tests/             # 58 pruebas automáticas (Jest + Supertest)
+│   └── tests/             # 70 pruebas automáticas (Jest + Supertest)
 ├── iot/garita-esp32/     # firmware ESP32 (PlatformIO) + circuito Wokwi (Sprint 3)
 ├── iot/lector-qr/        # lector QR con cámara web para la garita en Wokwi (OpenCV)
 ├── mobile/                # app React Native + Expo SDK 58 (Sprint 4)
@@ -122,9 +122,9 @@ docker compose up -d --build
 ```bash
 make estado      # KPIs: debe mostrar ~1500 socios, recaudación del mes, morosidad...
 make test-db     # 19 pruebas de integridad: todas deben decir [OK]
-make test-api    # 58 pruebas de la API: todas deben pasar
+make test-api    # 70 pruebas de la API: todas deben pasar
 make test-dashboard  # 12 pruebas del modelo de riesgo: todas deben pasar
-make test-e2e    # 45 pruebas de punta a punta y de seguridad
+make test-e2e    # 48 pruebas de punta a punta y de seguridad
 make carga       # prueba de carga de la garita (RNF02)
 make evidencias  # todo lo anterior, guardado en docs/evidencias/ para el informe
 curl localhost:3000/api/v1/health
@@ -174,7 +174,12 @@ Guía completa (Node.js en Fedora, Expo Go, problemas de red): [`mobile/README.m
 Se levanta junto con todo lo demás (`make up`). Abre **http://localhost:8501** e ingresa con
 `admin` / `Admin2026!`. Incluye el dashboard de KPIs, el **modelo de riesgo de morosidad**, el registro
 de la garita **en vivo** (se actualiza cada 5 s: pasa una tarjeta en Wokwi y mírala aparecer), reservas,
-pagos en ventanilla, socios, noticias/eventos y nómina.
+pagos en ventanilla, socios, noticias/eventos, **tienda**, **servicios del club** y nómina.
+
+**Imágenes:** desde el panel se suben las fotos de los productos de la tienda (*Tienda*), de los eventos
+(*Noticias y eventos → Eventos*) y del restaurante, la capilla y la posta (*Servicios del club*). Aparecen en la
+app al instante; donde no hay foto, la app muestra un ícono. Se guardan en el volumen `girasoles-archivos`:
+`make down` las conserva, pero `make reset` las borra junto con la base de datos.
 Detalles y metodología del modelo: [`dashboard/README.md`](dashboard/README.md).
 
 <p align="center">

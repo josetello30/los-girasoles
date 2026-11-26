@@ -142,3 +142,8 @@ def limpiar_todo():
 
 def tabla_vacia(columnas) -> pd.DataFrame:
     return pd.DataFrame(columns=columnas)
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def pedidos_tienda():
+    return _leer(datos.pedidos_tienda)

@@ -52,7 +52,7 @@ with pestana_eventos:
     with col1, st.container(border=True):
         st.subheader("Próximos eventos")
         e["inicia_en"] = pd.to_datetime(e["inicia_en"]).dt.tz_convert("America/Lima")
-        st.dataframe(e, hide_index=True, column_config={
+        st.dataframe(e.drop(columns=["id", "imagen_url"]), hide_index=True, column_config={
             "titulo": "Evento", "categoria": "Categoría", "lugar": "Lugar",
             "inicia_en": st.column_config.DatetimeColumn("Inicio", format="DD/MM/YYYY HH:mm"),
             "cupo": "Cupo", "inscritos": "Inscritos",
@@ -69,6 +69,31 @@ with pestana_eventos:
             st.plotly_chart(c.estilo(fig, 280, leyenda=False), config={"displayModeBar": False})
 
     with st.container(border=True):
+        st.subheader("Imagen de un evento")
+        if e.empty:
+            c.sin_datos("No hay eventos próximos")
+        else:
+            opciones = {f"{f.titulo} · {f.inicia_en:%d/%m/%Y}": f for f in e.itertuples()}
+            elegido = opciones[st.selectbox("Evento", list(opciones), key="evento_imagen")]
+            col_img, col_form = st.columns([1, 2])
+            with col_img:
+                c.mostrar_imagen(elegido.imagen_url, alto_vacio=180, texto_vacio="Sin imagen: la app muestra solo el texto")
+            with col_form, st.form(f"imagen_evento_{elegido.id}", border=False):
+                foto = c.selector_imagen("Nueva imagen", clave=f"foto_evento_{elegido.id}")
+                quitar = st.checkbox("Quitar la imagen actual", disabled=pd.isna(elegido.imagen_url))
+                if st.form_submit_button("Guardar imagen", type="primary", icon=":material/image:"):
+                    cuerpo = None
+                    if foto is not None:
+                        ruta = c.subir_imagen(foto)
+                        cuerpo = {"imagen_url": ruta} if ruta else None
+                    elif quitar:
+                        cuerpo = {"imagen_url": None}
+                    else:
+                        st.warning("Elige una imagen o marca \"Quitar la imagen actual\".")
+                    if cuerpo and c.accion_api("patch", f"/eventos/{elegido.id}", cuerpo, exito="Imagen del evento actualizada") is not None:
+                        st.rerun()
+
+    with st.container(border=True):
         st.subheader("Crear evento")
         with st.form("evento", clear_on_submit=True, border=False):
             a, b = st.columns([2, 1])
@@ -83,6 +108,7 @@ with pestana_eventos:
             a, b = st.columns(2)
             cupo = a.number_input("Cupo (0 = sin límite)", 0, 2000, 0)
             costo = b.number_input("Costo (S/)", 0.0, 1000.0, 0.0, step=5.0)
+            foto = c.selector_imagen("Imagen del evento (opcional)", clave="foto_evento_nuevo")
             if st.form_submit_button("Crear evento", type="primary", icon=":material/event:"):
                 inicio = datetime.combine(dia, hora, tzinfo=c.ZONA)
                 cuerpo = {"titulo": titulo.strip(), "descripcion": descripcion.strip(), "categoria": categoria,
@@ -90,4 +116,8 @@ with pestana_eventos:
                           "termina_en": (inicio + timedelta(hours=int(duracion))).isoformat(), "costo": float(costo)}
                 if cupo:
                     cuerpo["cupo"] = int(cupo)
-                c.accion_api("post", "/eventos", cuerpo, exito="Evento creado")
+                ruta = c.subir_imagen(foto)
+                if ruta:
+                    cuerpo["imagen_url"] = ruta
+                if foto is None or ruta:
+                    c.accion_api("post", "/eventos", cuerpo, exito="Evento creado")

@@ -158,6 +158,7 @@ export interface Evento {
   inscripciones_abiertas: boolean;
   inscritos: number;
   estoy_inscrito: boolean;
+  imagen_url: string | null;
 }
 
 export interface ServicioClub {
@@ -167,6 +168,7 @@ export interface ServicioClub {
   descripcion: string;
   horario: string;
   telefono: string | null;
+  imagen_url: string | null;
 }
 
 export interface Producto {
@@ -177,6 +179,7 @@ export interface Producto {
   categoria: string;
   precio: number;
   stock: number;
+  imagen_url: string | null;
 }
 
 export interface PedidoCreado {

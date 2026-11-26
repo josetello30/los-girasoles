@@ -8,6 +8,8 @@ const db = require('../../db');
 const { validar, z, uuid } = require('../../middlewares/validar');
 const { requiereRol, soloSocio } = require('../../middlewares/auth');
 const { errores } = require('../../utils/errores');
+const { actualizacionParcial } = require('../../utils/sql');
+const { esquemaImagen } = require('../archivos/archivos.rutas');
 
 // ------------------------------------------------------------ noticias
 const noticias = Router();
@@ -28,7 +30,7 @@ const esquemaNoticia = z.object({
   titulo: z.string().trim().min(5).max(120),
   contenido: z.string().trim().min(10).max(4000),
   categoria: z.enum(['IMPORTANTE', 'MANTENIMIENTO', 'EVENTO', 'GENERAL']).default('GENERAL'),
-  imagen_url: z.string().url().optional(),
+  imagen_url: esquemaImagen.optional(),
   publicada_en: z.string().datetime({ offset: true }).optional(),
   expira_en: z.string().datetime({ offset: true }).optional(),
 });
@@ -137,7 +139,7 @@ eventos.post(
       termina_en: z.string().datetime({ offset: true }),
       cupo: z.number().int().positive().optional(),
       costo: z.number().min(0).default(0),
-      imagen_url: z.string().url().optional(),
+      imagen_url: esquemaImagen.optional(),
     }),
   }),
   async (req, res) => {
@@ -151,15 +153,69 @@ eventos.post(
   },
 );
 
+/** PATCH /eventos/:id (admin) -> imagen, textos o abrir/cerrar inscripciones */
+eventos.patch(
+  '/:id',
+  requiereRol('ADMIN'),
+  validar({
+    params: z.object({ id: uuid }),
+    body: z.object({
+      titulo: z.string().trim().min(5).max(120),
+      descripcion: z.string().trim().min(10).max(4000),
+      lugar: z.string().trim().min(3).max(80),
+      imagen_url: esquemaImagen,
+      inscripciones_abiertas: z.boolean(),
+    }).partial(),
+  }),
+  async (req, res) => {
+    const { sets, valores } = actualizacionParcial(
+      req.valido.body, ['titulo', 'descripcion', 'lugar', 'imagen_url', 'inscripciones_abiertas'],
+    );
+    if (!sets) throw errores.solicitudInvalida('No se envió ningún campo para actualizar');
+    const { rows } = await db.query(
+      `UPDATE evento SET ${sets} WHERE id = $${valores.length + 1} RETURNING *`,
+      [...valores, req.valido.params.id],
+    );
+    if (!rows.length) throw errores.noEncontrado('Evento no encontrado');
+    res.json(rows[0]);
+  },
+);
+
 // ------------------------------------------------------------ servicios
 const servicios = Router();
 
 /** GET /servicios -> posta, capilla, restaurante, administración */
 servicios.get('/', async (_req, res) => {
   const { rows } = await db.query(
-    'SELECT id, nombre, tipo, descripcion, horario, telefono FROM servicio_club WHERE activo ORDER BY nombre',
+    'SELECT id, nombre, tipo, descripcion, horario, telefono, imagen_url FROM servicio_club WHERE activo ORDER BY nombre',
   );
   res.json(rows);
 });
+
+/** PATCH /servicios/:id (admin) -> foto, descripción, horario o teléfono del restaurante, capilla, posta... */
+servicios.patch(
+  '/:id',
+  requiereRol('ADMIN'),
+  validar({
+    params: z.object({ id: uuid }),
+    body: z.object({
+      descripcion: z.string().trim().min(10).max(1000),
+      horario: z.string().trim().min(3).max(120),
+      telefono: z.string().trim().regex(/^[0-9 +-]{6,15}$/, 'Teléfono inválido').nullable(),
+      imagen_url: esquemaImagen,
+    }).partial(),
+  }),
+  async (req, res) => {
+    const { sets, valores } = actualizacionParcial(req.valido.body, ['descripcion', 'horario', 'telefono', 'imagen_url']);
+    if (!sets) throw errores.solicitudInvalida('No se envió ningún campo para actualizar');
+    const { rows } = await db.query(
+      `UPDATE servicio_club SET ${sets} WHERE id = $${valores.length + 1}
+       RETURNING id, nombre, tipo, descripcion, horario, telefono, imagen_url`,
+      [...valores, req.valido.params.id],
+    );
+    if (!rows.length) throw errores.noEncontrado('Servicio no encontrado');
+    res.json(rows[0]);
+  },
+);
 
 module.exports = { noticias, eventos, servicios };

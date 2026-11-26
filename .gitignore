@@ -30,3 +30,6 @@ venv/
 Thumbs.db
 *.swp
 .idea/
+
+# Imágenes subidas en desarrollo local
+backend/archivos/

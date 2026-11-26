@@ -27,6 +27,9 @@ ENV NODE_ENV=production
 COPY --from=dependencias /app/node_modules ./node_modules
 COPY package.json ./
 COPY src ./src
+# Carpeta de imágenes subidas (se monta como volumen); del usuario node para poder escribir
+RUN mkdir -p /app/archivos && chown node:node /app/archivos
+ENV ARCHIVOS_DIR=/app/archivos
 # No se ejecuta como root dentro del contenedor
 USER node
 EXPOSE 3000

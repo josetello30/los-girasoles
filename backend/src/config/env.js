@@ -48,6 +48,9 @@ const config = {
   // Confiar sin tener proxy permitiría saltarse el límite de intentos falsificando la cabecera.
   proxiesConfiables: Number(process.env.TRUST_PROXY || 0),
 
+  // Carpeta donde se guardan las imágenes subidas (en Docker: volumen girasoles-archivos)
+  dirArchivos: process.env.ARCHIVOS_DIR || require('node:path').join(__dirname, '..', '..', 'archivos'),
+
   zonaHoraria: 'America/Lima',
 };
 

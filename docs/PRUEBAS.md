@@ -15,12 +15,12 @@ make evidencias   # ejecuta TODAS las pruebas y guarda los resultados en docs/ev
 | Comando | Qué ejecuta | Pruebas | Herramienta |
 |---|---|---|---|
 | `make test-db` | Integridad de la base de datos | 19 | SQL (PL/pgSQL) |
-| `make test-api` | API REST por módulo | 58 | Jest + Supertest |
+| `make test-api` | API REST por módulo | 70 | Jest + Supertest |
 | `make test-dashboard` | Modelo de riesgo de morosidad | 12 | pytest |
-| `make test-e2e` | Flujos de punta a punta y seguridad sobre el sistema levantado | 45 | `node:test` (Node 22) |
+| `make test-e2e` | Flujos de punta a punta y seguridad sobre el sistema levantado | 48 | `node:test` (Node 22) |
 | `make test-lector` | Lector QR con cámara web (QR fotografiados, video de prueba, Wokwi simulado) | 19 | pytest + OpenCV |
 | `make carga` | Carga de la garita con 1 a 50 lecturas simultáneas (RNF02) | 4 niveles × 200 | Node 22 |
-| **Total automatizado** | | **153 pruebas + prueba de carga** | |
+| **Total automatizado** | | **168 pruebas + prueba de carga** | |
 
 En GitHub, el pipeline de integración continua (`.github/workflows/ci.yml`) ejecuta todo esto en cada
 `push` a `main`, además de compilar el firmware y revisar la app móvil. Las evidencias de cada
@@ -30,9 +30,9 @@ ejecución se descargan desde la pestaña **Actions**.
 
 ```mermaid
 flowchart BT
-    BD["Base de datos · 19<br/>restricciones, triggers, permisos"] --> API["API · 58<br/>cada módulo y regla de negocio"]
+    BD["Base de datos · 19<br/>restricciones, triggers, permisos"] --> API["API · 70<br/>cada módulo y regla de negocio"]
     MOD["Modelo IA · 12<br/>fuga de información, calibración"] --> E2E
-    API --> E2E["Punta a punta · 30<br/>app → API → BD → garita → panel"]
+    API --> E2E["Punta a punta · 33<br/>app → API → BD → garita → panel"]
     E2E --> SEG["Seguridad · 15<br/>OWASP API Top 10"]
     E2E --> CARGA["Carga · RNF02<br/>50 garitas simultáneas"]
 ```
@@ -80,6 +80,7 @@ flowchart BT
 | E2E-07 | Noticia importante publicada en el panel → arriba en la app → al retirarla desaparece | Panel, API, app |
 | E2E-08 | Invitado registrado en la app → la garita lo deja pasar con su QR | App, API, garita |
 | E2E-09 | La API, su base de datos y el panel están saludables | Docker |
+| E2E-10 | Foto subida desde el panel → la app recibe la ruta y descarga la imagen | Panel, API, app |
 
 ## Pruebas de seguridad (OWASP API Security Top 10)
 

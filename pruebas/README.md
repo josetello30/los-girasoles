@@ -4,7 +4,7 @@ Se ejecutan contra el sistema **levantado** (`make up`), con los mismos contrato
 app móvil, el panel y el firmware del ESP32. No necesitan `npm install`: solo Node 22.
 
 ```bash
-make test-e2e    # 30 pruebas de flujos + 15 de seguridad (en su propio contenedor)
+make test-e2e    # 33 pruebas de flujos + 15 de seguridad (en su propio contenedor)
 make carga       # prueba de carga de la garita (RNF02)
 make evidencias  # todas las pruebas del proyecto, con resultados en docs/evidencias/
 ```
@@ -19,7 +19,7 @@ PANEL_URL=http://localhost:8501 npm run e2e   # incluye la prueba de salud del p
 
 | Archivo | Contenido |
 |---|---|
-| `e2e/01_flujos.test.mjs` | E2E-01 a E2E-09: QR, tarjetas Wokwi, moroso, reserva y pago, ventanilla, mantenimiento, noticias, invitados, salud |
+| `e2e/01_flujos.test.mjs` | E2E-01 a E2E-10: QR, tarjetas Wokwi, moroso, reserva y pago, ventanilla, mantenimiento, noticias, invitados, salud, imágenes |
 | `e2e/02_seguridad.test.mjs` | SEG-01 a SEG-05: autenticación, autorización, inyección, exposición de datos, fuerza bruta |
 | `carga/garita.mjs` | 1, 10, 25 y 50 garitas simultáneas; p50, p95, p99 |
 | `lib/cliente.mjs` | Cliente HTTP con `fetch` nativo |

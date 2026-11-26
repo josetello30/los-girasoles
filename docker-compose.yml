@@ -84,6 +84,8 @@ services:
       RESERVA_PENDIENTE_MINUTOS: ${RESERVA_PENDIENTE_MINUTOS:-30}
       TRUST_PROXY: ${TRUST_PROXY:-0}
       TZ: America/Lima
+    volumes:
+      - archivos:/app/archivos   # imágenes de eventos, productos y servicios
     ports:
       - "${BACKEND_PORT:-3000}:3000"
     depends_on:
@@ -168,3 +170,5 @@ services:
 volumes:
   pgdata:
     name: girasoles-pgdata
+  archivos:
+    name: girasoles-archivos

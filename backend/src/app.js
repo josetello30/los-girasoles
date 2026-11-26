@@ -23,6 +23,7 @@ const invitadosRutas = require('./modules/invitados/invitados.rutas');
 const { noticias, eventos, servicios } = require('./modules/comunicacion/comunicacion.rutas');
 const tiendaRutas = require('./modules/tienda/tienda.rutas');
 const nominaRutas = require('./modules/nomina/nomina.rutas');
+const { router: archivosRutas } = require('./modules/archivos/archivos.rutas');
 
 function crearApp() {
   const app = express();
@@ -51,6 +52,7 @@ function crearApp() {
   });
   v1.use('/auth', authRutas);
   v1.use('/accesos', accesosRutas); // garita (API key) y QR (JWT) se autentican dentro
+  v1.use('/archivos', archivosRutas); // ver imágenes es público; subirlas exige admin (dentro)
 
   // ---------------- A partir de aquí todo requiere sesión
   v1.use(autenticar);

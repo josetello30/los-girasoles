@@ -18,6 +18,8 @@ borderColor = "#2E6F33"
 [server]
 headless = true
 runOnSave = false
+# Límite de subida igual al del backend (POST /archivos)
+maxUploadSize = 5
 
 [browser]
 gatherUsageStats = false

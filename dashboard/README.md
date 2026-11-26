@@ -55,7 +55,9 @@ pytest -v
 | Reservas | Mapa de calor día × hora, ocupación, agenda del día, bloqueo de instalaciones | RF02 |
 | Pagos | Recaudación mensual, medios de pago, registro de pago en ventanilla | RF04 |
 | Socios | Padrón filtrable, ficha del socio, bloqueo de tarjeta, cambio de estado | RF04 |
-| Noticias y eventos | Publicar / retirar noticias en la app, crear eventos, inscripciones por disciplina | RF03 |
+| Noticias y eventos | Publicar / retirar noticias en la app, crear eventos con imagen, cambiar la imagen de un evento, inscripciones por disciplina | RF03 |
+| Tienda | Catálogo con fotos, crear y editar productos (precio, stock, foto, ocultar), pedidos de los socios | — |
+| Servicios del club | Foto, descripción, horario y teléfono del restaurante, la capilla y la posta | — |
 | Nómina | Planillas (simuladas), boletas, generar y cerrar planilla, asistencia del personal | — |
 
 ## Modelo de riesgo de morosidad

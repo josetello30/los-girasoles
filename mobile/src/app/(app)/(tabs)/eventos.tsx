@@ -8,6 +8,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { api } from '@/api/cliente';
 import type { Evento } from '@/api/tipos';
 import { Boton, Cargando, ErrorVista, Tarjeta, Vacio } from '@/componentes/basicos';
+import { ImagenRemota } from '@/componentes/ImagenRemota';
 import { Pantalla } from '@/componentes/Pantalla';
 import { Texto } from '@/componentes/Texto';
 import { useConsulta } from '@/hooks/useConsulta';
@@ -63,9 +64,12 @@ function TarjetaEvento({ evento, alCambiar }: { evento: Evento; alCambiar: () =>
 
   return (
     <Tarjeta style={{ padding: 0, overflow: 'hidden' }}>
-      <View style={[e.portada, { backgroundColor: cat.fondo }]}>
-        <MaterialCommunityIcons name={cat.icono} size={64} color={cat.color} />
-      </View>
+      <ImagenRemota
+        ruta={evento.imagen_url}
+        estilo={[e.portada, { backgroundColor: cat.fondo }, evento.imagen_url ? e.portadaFoto : null]}
+        descripcion={`Imagen de ${evento.titulo}`}
+        respaldo={<MaterialCommunityIcons name={cat.icono} size={64} color={cat.color} />}
+      />
       <View style={{ padding: espacio.l, gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={[e.chip, { backgroundColor: cat.color }]}>
@@ -121,7 +125,8 @@ export default function Eventos() {
 }
 
 const e = StyleSheet.create({
-  portada: { height: 120, alignItems: 'center', justifyContent: 'center' },
+  portada: { height: 120, width: '100%', alignItems: 'center', justifyContent: 'center' },
+  portadaFoto: { height: 170 },
   chip: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: radio.pill },
   textoChip: { color: colores.blanco, fontFamily: fuentes.negrita, fontSize: 11.5 },
   inscrito: {

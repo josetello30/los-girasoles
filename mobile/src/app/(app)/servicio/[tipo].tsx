@@ -8,6 +8,7 @@ import { Linking, StyleSheet, View } from 'react-native';
 
 import type { Instalacion, ServicioClub } from '@/api/tipos';
 import { Boton, Cargando, ErrorVista, Tarjeta } from '@/componentes/basicos';
+import { ImagenRemota } from '@/componentes/ImagenRemota';
 import { Pantalla } from '@/componentes/Pantalla';
 import { Texto } from '@/componentes/Texto';
 import { useConsulta } from '@/hooks/useConsulta';
@@ -34,9 +35,12 @@ export default function FichaServicio() {
       {servicios.error && <ErrorVista mensaje={servicios.error} alReintentar={servicios.recargar} />}
       {servicio && (
         <>
-          <View style={[e.portada, { backgroundColor: estilo.fondo }]}>
-            <Ionicons name={estilo.icono} size={72} color={estilo.color} />
-          </View>
+          <ImagenRemota
+            ruta={servicio.imagen_url}
+            estilo={[e.portada, { backgroundColor: estilo.fondo }, servicio.imagen_url ? e.portadaFoto : null]}
+            descripcion={`Foto de ${servicio.nombre}`}
+            respaldo={<Ionicons name={estilo.icono} size={72} color={estilo.color} />}
+          />
           <Tarjeta style={{ gap: espacio.m }}>
             <Texto variante="subtitulo">{servicio.nombre}</Texto>
             <Texto>{servicio.descripcion}</Texto>
@@ -69,6 +73,7 @@ export default function FichaServicio() {
 }
 
 const e = StyleSheet.create({
-  portada: { height: 150, borderRadius: radio.m, alignItems: 'center', justifyContent: 'center' },
+  portada: { height: 150, width: '100%', borderRadius: radio.m, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  portadaFoto: { height: 200 },
   dato: { flexDirection: 'row', alignItems: 'center', gap: espacio.s },
 });

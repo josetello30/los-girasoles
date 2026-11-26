@@ -9,6 +9,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { api } from '@/api/cliente';
 import type { PedidoCreado, Producto } from '@/api/tipos';
 import { Boton, Cargando, ErrorVista, Fila, Tarjeta } from '@/componentes/basicos';
+import { ImagenRemota } from '@/componentes/ImagenRemota';
 import { Pantalla } from '@/componentes/Pantalla';
 import { Texto } from '@/componentes/Texto';
 import { useConsulta } from '@/hooks/useConsulta';
@@ -65,9 +66,12 @@ export default function Tienda() {
           const cantidad = carrito[p.id] ?? 0;
           return (
             <Tarjeta key={p.id} style={e.producto}>
-              <View style={e.imagen}>
-                <MaterialCommunityIcons name={ICONO_SKU[p.sku.slice(0, 3)] ?? 'shopping'} size={44} color={colores.verde} />
-              </View>
+              <ImagenRemota
+                ruta={p.imagen_url}
+                estilo={e.imagen}
+                descripcion={`Foto de ${p.nombre}`}
+                respaldo={<MaterialCommunityIcons name={ICONO_SKU[p.sku.slice(0, 3)] ?? 'shopping'} size={44} color={colores.verde} />}
+              />
               <Texto variante="etiqueta" numberOfLines={2} style={{ minHeight: 38 }}>{p.nombre}</Texto>
               <Texto style={{ fontFamily: fuentes.negrita, color: colores.naranja, fontSize: 16 }}>{soles(p.precio)}</Texto>
               <Texto variante="pequeno">{p.stock > 0 ? `${p.stock} disponibles` : 'Agotado'}</Texto>
@@ -102,7 +106,7 @@ export default function Tienda() {
 const e = StyleSheet.create({
   grilla: { flexDirection: 'row', flexWrap: 'wrap', gap: espacio.m },
   producto: { width: '47.8%', gap: 4, padding: espacio.m },
-  imagen: { height: 90, borderRadius: radio.s, backgroundColor: colores.verdeSuave, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  imagen: { height: 110, width: '100%', borderRadius: radio.s, backgroundColor: colores.verdeSuave, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   contador: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 6 },
   botonCantidad: { width: 34, height: 34, borderRadius: 17, backgroundColor: colores.verdeSuave, alignItems: 'center', justifyContent: 'center' },
   signo: { fontFamily: fuentes.negrita, fontSize: 18, color: colores.verde },
